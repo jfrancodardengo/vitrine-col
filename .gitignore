@@ -1,0 +1,18 @@
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Arquivos dos editores
+.vscode/
+.idea/
+
+# Segredos e arquivos locais: nunca versionar
+.env
+.env.*
+*.local
+
+# Registros e temporários
+*.log
+*.tmp
+*.bak
