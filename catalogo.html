@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catálogo – VitrineCol</title>
+  <meta name="description" content="Todas as roupas das lojas locais: filtre por tipo, tamanho e loja.">
+</head>
+
+<body>
+  <a class="link-pular" href="#conteudo">Ir para o conteúdo</a>
+  <header class="cabecalho" id="cabecalho">
+    <div class="container cabecalho-conteudo">
+      <a class="logotipo" href="index.html">VitrineCol</a>
+      <nav aria-label="Principal">
+        <ul class="menu">
+          <li><a href="index.html">Início</a></li>
+          <li><a href="catalogo.html" aria-current="page">Catálogo</a></li>
+          <li><a href="sacola.html">Sacola</a></li>
+          <li><a href="login.html">Entrar</a></li>
+          <li><a href="cadastro.html">Cadastrar</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo" class="container">
+    <h1>Catálogo</h1>
+
+    <form class="filtros" aria-label="Filtros do catálogo">
+      <div class="campo">
+        <label for="busca">Buscar pelo nome</label>
+        <input type="search" id="busca" name="busca" placeholder="Ex.: vestido">
+      </div>
+
+      <div class="filtros-campos">
+        <div class="campo">
+          <label for="filtro-loja">Loja</label>
+          <select id="filtro-loja" name="loja">
+            <option value="">Todas</option>
+            <option>Loja Exemplo</option>
+            <option>Loja do Bairro</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="filtro-tamanho">Tamanho</label>
+          <select id="filtro-tamanho" name="tamanho">
+            <option value="">Todos</option>
+            <option>P</option>
+            <option>M</option>
+            <option>G</option>
+            <option>GG</option>
+            <option>38</option>
+            <option>40</option>
+            <option>42</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <p class="legenda" id="rotulo-categorias">Tipo de roupa</p>
+        <ul class="chips" id="chips-categorias" aria-labelledby="rotulo-categorias">
+          <li>
+            <button type="button" class="chip" aria-pressed="true">Todas</button>
+          </li>
+          <li>
+            <button type="button" class="chip" aria-pressed="true">Blusas</button>
+          </li>
+          <li>
+            <button type="button" class="chip" aria-pressed="true">Camisetas</button>
+          </li>
+          <li>
+            <button type="button" class="chip" aria-pressed="true">Vestidos</button>
+          </li>
+          <li>
+            <button type="button" class="chip" aria-pressed="true">Calças</button>
+          </li>
+          <li>
+            <button type="button" class="chip" aria-pressed="true">Saias</button>
+          </li>
+          <li>
+            <button type="button" class="chip" aria-pressed="true">Shorts</button>
+          </li>
+          <li>
+            <button type="button" class="chip" aria-pressed="true">Jaquetas</button>
+          </li>
+          <li>
+            <button type="button" class="chip" aria-pressed="true">Acessórios</button>
+          </li>
+        </ul>
+      </div>
+    </form>
+
+    <section aria-labelledby="titulo-produtos">
+      <h2 id="titulo-produtos" class="visualmente-oculto">Produtos</h2>
+      <ul class="grade-produtos" id="lista-produtos"></ul>
+    </section>
+
+    <footer class="rodape">
+      <div class="container">
+        <ul class="rodape-links">
+          <li><a href="privacidade.html">Aviso de privacidade</a></li>
+          <li><a href="meus-pedidos.html">Meus pedidos</a></li>
+          <li><a href="painel-loja.html">Painel da loja</a></li>
+        </ul>
+        <p>Projeto integrador – Jovem Programadora (Senac). Pagamento e entrega são combinados direto com a loja.</p>
+      </div>
+    </footer>
+  </main>
+
+</body>
+
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar – VitrineCol</title>
+</head>
+
+<body>
+  <a class="link-pular" href="#conteudo">Ir para o conteúdo</a>
+  <header class="cabecalho" id="cabecalho">
+    <div class="container cabecalho-conteudo">
+      <a class="logotipo" href="index.html">VitrineCol</a>
+      <nav aria-label="Principal">
+        <ul class="menu">
+          <li><a href="index.html">Início</a></li>
+          <li><a href="catalogo.html">Catálogo</a></li>
+          <li><a href="sacola.html">Sacola</a></li>
+          <li><a href="login.html" aria-current="page">Entrar</a></li>
+          <li><a href="cadastro.html">Cadastrar</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo" class="container">
+    <div class="cartao-forumulario">
+      <h1>Entrar</h1>
+      <form class="formulario" id="formulario-login" novalidate>
+        <div class="campo">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" autocomplete="email" required>
+        </div>
+
+        <div class="campo">
+          <label for="senha">Senha</label>
+          <input type="password" id="senha" autocomplete="current-password" required>
+        </div>
+
+        <button type="submit" class="botao">Entrar</button>
+      </form>
+
+      <p>
+        <a href="recuperar-senha.html">Esqueci minha senha</a>
+      </p>
+      <p>
+        Ainda não tem conta?
+        <a href="cadastro.html" id="link-cadastro">Cadastre-se</a>
+      </p>
+    </div>
+  </main>
+
+  <footer class="rodape">
+    <div class="container">
+      <ul class="rodape-links">
+        <li><a href="privacidade.html">Aviso de privacidade</a></li>
+        <li><a href="meus-pedidos.html">Meus pedidos</a></li>
+        <li><a href="painel-loja.html">Painel da loja</a></li>
+      </ul>
+      <p>Projeto integrador – Jovem Programadora (Senac). Pagamento e entrega são combinados direto com a loja.</p>
+    </div>
+  </footer>
+</body>
+
+</html>
