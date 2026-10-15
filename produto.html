@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Produto – VitrineCol</title>
+</head>
+
+<body>
+  <a class="link-pular" href="#conteudo">Ir para o conteúdo</a>
+  <header class="cabecalho" id="cabecalho">
+    <div class="container cabecalho-conteudo">
+      <a class="logotipo" href="index.html">VitrineCol</a>
+      <nav aria-label="Principal">
+        <ul class="menu">
+          <li><a href="index.html">Início</a></li>
+          <li><a href="catalogo.html">Catálogo</a></li>
+          <li><a href="sacola.html">Sacola</a></li>
+          <li><a href="login.html">Entrar</a></li>
+          <li><a href="cadastro.html">Cadastrar</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo" class="container">
+    <h1 id="titulo-produto">Vestido midi floral</h1>
+
+    <article class="produto-detalhe" id="produto-detalhe">
+      <section aria-label="Fotos do produto">
+        <img class="galeria-principal" id="foto-principal" src="imagens/exemplo-1.svg"
+          alt="Foto 1 de 3: Vestido midi floral" width="600" height="750">
+        <ul class="galeria-miniaturas" id="miniaturas">
+          <li><button type="button" class="miniatura" aria-current="true"><img src="imagens/exemplo-1.svg"
+                alt="Ver a foto 1 de 3" width="600" height="750"></button></li>
+          <li><button type="button" class="miniatura"><img src="imagens/exemplo-2.svg" alt="Ver a foto 2 de 3"
+                width="600" height="750"></button></li>
+          <li><button type="button" class="miniatura"><img src="imagens/exemplo-3.svg" alt="Ver a foto 3 de 3"
+                width="600" height="750"></button></li>
+        </ul>
+      </section>
+
+      <section class="produto-info" aria-label="Informações do produto">
+        <p class="preco" id="preco-produto">R$ 129,90</p>
+        <p>Vendido por <a id="link-loja" href="loja.html">Loja Exemplo</a></p>
+        <p id="descricao-produto">Tecido leve, ideal para o verão</p>
+
+        <form class="produto-compra" id="formulario-compra" novalidate aria-label="Adicionar à sacola">
+          <fieldset class="campo" id="campo-tamanho">
+            <legend>Tamanho</legend>
+            <div class="tamanhos" id="tamanhos">
+              <label class="tamanho-opcao"><input type="radio" name="tamanho" id="tamanho-0" value="P"
+                  aria-label="P"><span>P</span></label>
+              <label class="tamanho-opcao"><input type="radio" name="tamanho" id="tamanho-1" value="M"
+                  aria-label="M"><span>M</span></label>
+              <label class="tamanho-opcao"><input type="radio" name="tamanho" id="tamanho-2" value="G" disabled
+                  aria-label="G, sem estoque"><span>G</span></label>
+            </div>
+            <p class="campo-ajuda">Tamanhos riscados estão sem estoque.</p>
+          </fieldset>
+
+          <div class="campo">
+            <label for="quantidade">Quantidade</label>
+            <input type="number" id="quantidade" name="quantidade" min="1" step="1" value="1">
+          </div>
+
+          <button type="submit" class="botao" id="botao-adicionar">Adicionar à sacola</button>
+
+        </form>
+      </section>
+    </article>
+
+  </main>
+
+  <footer class="rodape">
+    <div class="container">
+      <ul class="rodape-links">
+        <li><a href="privacidade.html">Aviso de privacidade</a></li>
+        <li><a href="meus-pedidos.html">Meus pedidos</a></li>
+        <li><a href="painel-loja.html">Painel da loja</a></li>
+      </ul>
+      <p>Projeto integrador – Jovem Programadora (Senac). Pagamento e entrega são combinados direto com a loja.</p>
+    </div>
+  </footer>
+</body>
+
+</html>

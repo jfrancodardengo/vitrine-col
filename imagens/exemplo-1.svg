@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 750" role="img" aria-label="Imagem de exemplo de roupa">
+  <rect width="600" height="750" fill="#e8c4d4"/>
+  <path d="M220 170 L300 200 L380 170 L470 240 L420 310 L390 290 L390 600 L210 600 L210 290 L180 310 L130 240 Z" fill="#ffffff" fill-opacity="0.75" stroke="#6b1a40" stroke-width="6" stroke-linejoin="round"/>
+  <text x="300" y="690" font-family="sans-serif" font-size="28" text-anchor="middle" fill="#2b2230">Foto de exemplo 1</text>
+</svg>

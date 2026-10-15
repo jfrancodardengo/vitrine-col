@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Loja – VitrineCol</title>
+</head>
+
+<body>
+  <a class="link-pular" href="#conteudo">Ir para o conteúdo</a>
+  <header class="cabecalho" id="cabecalho">
+    <div class="container cabecalho-conteudo">
+      <a class="logotipo" href="index.html">VitrineCol</a>
+      <nav aria-label="Principal">
+        <ul class="menu">
+          <li><a href="index.html">Início</a></li>
+          <li><a href="catalogo.html">Catálogo</a></li>
+          <li><a href="sacola.html">Sacola</a></li>
+          <li><a href="login.html">Entrar</a></li>
+          <li><a href="cadastro.html">Cadastrar</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo" class="container">
+    <h1 id="titulo-loja">Loja Exemplo</h1>
+
+    <section class="loja-resumo" id="resumo-loja" aria-label="Dados da loja">
+      <div>
+        <p id="descricao-loja">Moda feminina casual e confortável</p>
+        <dl class="loja-dados">
+          <dt>Endereço</dt>
+          <dd id="endereco-loja">Rua das Flores, 100, Centro, Cidade Exemplo</dd>
+        </dl>
+        <div class="loja-acoes">
+          <a class="botao botao-whatsapp" id="botao-whatsapp" href="https://wa.me/5527999999999" target="_blank"
+            rel="noopener">Conversar no WhatsApp<span class="visualmente-oculto"> (abre em nova aba)</span></a>
+          <a class="botao botao-secundario" id="botao-mapa" href="https://www.google.com/maps" target="_blank"
+            rel="noopener">Ver no mapa<span class="visualmente-oculto"> (abre em nova aba)</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="titulo-produtos-loja" id="produtos-loja">
+      <h2 id="titulo-produtos-loja">Produtos da loja</h2>
+      <ul class="grade-produtos" id="lista-produtos">
+        <li>
+          <article class="card-produto">
+            <img class="card-produto-imagem" src="imagens/exemplo-1.svg" alt="Foto de Vestido midi floral" width="600"
+              height="750">
+            <div class="card-produto-corpo">
+              <h3 class="card-produto-titulo"><a href="produto.html">Vestido midi floral</a></h3>
+              <p class="preco">R$ 129,90</p>
+              <p class="card-produto-loja">Loja Exemplo</p>
+            </div>
+          </article>
+        </li>
+        <li>
+          <article class="card-produto">
+            <img class="card-produto-imagem" src="imagens/exemplo-2.svg" alt="Foto de Camiseta básica branca"
+              width="600" height="750">
+            <div class="card-produto-corpo">
+              <h3 class="card-produto-titulo"><a href="produto.html">Camiseta básica branca</a></h3>
+              <p class="preco">R$ 49,90</p>
+              <p class="card-produto-loja">Loja Exemplo</p>
+            </div>
+          </article>
+        </li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer class="rodape">
+    <div class="container">
+      <ul class="rodape-links">
+        <li><a href="privacidade.html">Aviso de privacidade</a></li>
+        <li><a href="meus-pedidos.html">Meus pedidos</a></li>
+        <li><a href="painel-loja.html">Painel da loja</a></li>
+      </ul>
+      <p>Projeto integrador – Jovem Programadora (Senac). Pagamento e entrega são combinados direto com a loja.</p>
+    </div>
+  </footer>
+</body>
+
+</html>
