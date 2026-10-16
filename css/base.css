@@ -1,0 +1,74 @@
+/* Reset leve, tipografia e utilitários básicos. Mobile-first. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--fonte-base);
+  font-size: var(--tamanho-base);
+  line-height: var(--altura-linha);
+  color: var(--cor-texto);
+  background-color: var(--cor-fundo);
+}
+
+main {
+  flex: 1;
+  padding-block: var(--espaco-5);
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+  margin: 0 0 var(--espaco-3);
+}
+
+h1 {
+  font-size: var(--tamanho-titulo);
+}
+
+h2 {
+  font-size: var(--tamanho-grande);
+}
+
+h3 {
+  font-size: var(--tamanho-medio);
+}
+
+p {
+  margin: 0 0 var(--espaco-3);
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: var(--cor-primaria-escura);
+}
+
+a:hover {
+  color: var(--cor-primaria);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Contêiner central; o padding lateral evita texto colado na borda do celular */
+.container {
+  width: 100%;
+  max-width: var(--largura-maxima);
+  margin-inline: auto;
+  padding-inline: var(--espaco-4);
+}
