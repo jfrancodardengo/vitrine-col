@@ -1,0 +1,318 @@
+/* Componentes reutilizáveis: cabeçalho, botões, cards, campos, avisos, chips, tabela. */
+
+/* ---------- Cabeçalho (Flexbox) ---------- */
+.cabecalho {
+  background-color: var(--cor-superficie);
+  border-bottom: 1px solid var(--cor-borda);
+  box-shadow: var(--sombra-leve);
+}
+
+.cabecalho-conteudo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-2) var(--espaco-4);
+  padding-block: var(--espaco-3);
+}
+
+.logotipo {
+  font-size: var(--tamanho-grande);
+  font-weight: 700;
+  color: var(--cor-primaria-escura);
+  text-decoration: none;
+}
+
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-1) var(--espaco-3);
+  list-style: none;
+}
+
+.menu a {
+  display: inline-block;
+  padding: var(--espaco-2) var(--espaco-1);
+  color: var(--cor-texto);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+}
+
+.menu a:hover,
+.menu a[aria-current="page"] {
+  color: var(--cor-primaria-escura);
+  border-bottom-color: var(--cor-primaria);
+}
+
+/* ---------- Rodapé ---------- */
+.rodape {
+  padding-block: var(--espaco-5);
+  background-color: var(--cor-superficie);
+  border-top: 1px solid var(--cor-borda);
+  color: var(--cor-texto-suave);
+  font-size: var(--tamanho-pequeno);
+}
+
+.rodape-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-1) var(--espaco-4);
+  list-style: none;
+  margin-bottom: var(--espaco-3);
+}
+
+/* ---------- Botões ---------- */
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-2);
+  min-height: 2.75rem;
+  padding: var(--espaco-2) var(--espaco-5);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--cor-texto-sobre-primaria);
+  background-color: var(--cor-primaria);
+  border: 2px solid var(--cor-primaria);
+  border-radius: var(--raio-medio);
+  cursor: pointer;
+}
+
+.botao:hover {
+  color: var(--cor-texto-sobre-primaria);
+  background-color: var(--cor-primaria-escura);
+  border-color: var(--cor-primaria-escura);
+}
+
+.botao-secundario {
+  color: var(--cor-primaria-escura);
+  background-color: var(--cor-superficie);
+}
+
+.botao-secundario:hover {
+  color: var(--cor-primaria-escura);
+  background-color: var(--cor-primaria-clara);
+}
+
+.botao-perigo {
+  color: var(--cor-erro);
+  background-color: var(--cor-superficie);
+  border-color: var(--cor-erro);
+}
+
+.botao-perigo:hover {
+  color: var(--cor-erro);
+  background-color: var(--cor-erro-fundo);
+  border-color: var(--cor-erro);
+}
+
+/* Verde do WhatsApp escurecido para manter contraste AA com texto branco */
+.botao-whatsapp {
+  background-color: #0b6b3a;
+  border-color: #0b6b3a;
+}
+
+.botao-whatsapp:hover {
+  background-color: #085530;
+  border-color: #085530;
+}
+
+.botao:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- Campos de formulário ---------- */
+.formulario {
+  display: grid;
+  gap: var(--espaco-4);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.campo label,
+.legenda {
+  font-weight: 600;
+}
+
+.campo input,
+.campo select,
+.campo textarea { 
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--espaco-2) var(--espaco-3);
+  font: inherit;
+  color: var(--cor-texto);
+  background-color: var(--cor-superficie);
+  border: 2px solid var(--cor-borda-campo);
+  border-radius: var(--raio-pequeno);
+}
+
+.campo textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.campo input:focus-visible,
+.campo select:focus-visible,
+.campo textarea:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 1px;
+}
+
+.campo-ajuda {
+  margin: 0;
+  font-size: var(--tamanho-pequeno);
+  color: var(--cor-texto-suave);
+}
+
+fieldset.campo {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+fieldset.campo legend {
+  padding: 0;
+  margin-bottom: var(--espaco-2);
+  font-weight: 600;
+}
+
+/* Opções de rádio e checkbox: o rótulo envolve o input para aumentar a área de clique */
+.opcao {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  min-height: 2.75rem;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.opcao input {
+  width: 1.25rem;
+  min-height: 0;
+  height: 1.25rem;
+  accent-color: var(--cor-primaria);
+}
+
+.opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-1) var(--espaco-4);
+}
+
+/* Botões de tamanho: radio estilizado como botão, com o input ainda focável pelo teclado */
+.tamanhos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+.tamanho-opcao {
+  position: relative;
+}
+
+.tamanho-opcao input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.tamanho-opcao span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: var(--espaco-1) var(--espaco-3);
+  font-weight: 600;
+  background-color: var(--cor-superficie);
+  border: 2px solid var(--cor-borda-campo);
+  border-radius: var(--raio-pequeno);
+}
+
+.tamanho-opcao input:checked + span {
+  color: var(--cor-texto-sobre-primaria);
+  background-color: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+}
+
+.tamanho-opcao input:focus-visible + span {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.tamanho-opcao input:disabled {
+  cursor: not-allowed;
+}
+
+.tamanho-opcao input:disabled + span {
+  color: var(--cor-texto-suave);
+  background-color: var(--cor-neutro-fundo);
+  text-decoration: line-through;
+}
+
+/* ---------- Avisos (carregando, erro, sucesso, informação) ---------- */
+.aviso {
+  margin-bottom: var(--espaco-4);
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid currentColor;
+  border-left-width: 6px;
+  border-radius: var(--raio-pequeno);
+}
+
+.aviso-erro {
+  color: var(--cor-erro);
+  background-color: var(--cor-erro-fundo);
+}
+
+.aviso-sucesso {
+  color: var(--cor-sucesso);
+  background-color: var(--cor-sucesso-fundo);
+}
+
+.aviso-info,
+.aviso-carregando {
+  color: var(--cor-info);
+  background-color: var(--cor-info-fundo);
+}
+
+/* ---------- Chips de filtro ---------- */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  list-style: none;
+}
+
+.chip {
+  min-height: 2.5rem;
+  padding: var(--espaco-1) var(--espaco-4);
+  font: inherit;
+  font-weight: 600;
+  color: var(--cor-texto);
+  background-color: var(--cor-superficie);
+  border: 2px solid var(--cor-borda-campo);
+  border-radius: var(--raio-pilula);
+  cursor: pointer;
+}
+
+.chip:hover {
+  background-color: var(--cor-primaria-clara);
+}
+
+.chip[aria-pressed="true"] {
+  color: var(--cor-texto-sobre-primaria);
+  background-color: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+}
