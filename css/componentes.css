@@ -124,6 +124,86 @@
   cursor: not-allowed;
 }
 
+/* ---------- Card de produto (grade: 1 coluna no celular, 2 no tablet, 3 a 4 no desktop) ---------- */
+.grade-produtos {
+  display: grid;
+  gap: var(--espaco-4);
+  grid-template-columns: 1fr;
+  list-style: none;
+}
+
+.card-produto {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+  box-shadow: var(--sombra-leve);
+}
+
+.card-produto-imagem {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background-color: var(--cor-neutro-fundo);
+}
+
+.card-produto-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  padding: var(--espaco-4);
+}
+
+.card-produto-titulo {
+  margin: 0;
+  font-size: var(--tamanho-medio);
+}
+
+.card-produto-titulo a {
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+/* O link do título cobre o card inteiro, assim o card todo é clicável */
+.card-produto {
+  position: relative;
+}
+
+.card-produto-titulo a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.card-produto-titulo a:hover {
+  text-decoration: underline;
+}
+
+.card-produto:focus-within {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.card-produto-titulo a:focus-visible {
+  outline: none;
+}
+
+.preco {
+  margin: 0;
+  font-size: var(--tamanho-medio);
+  font-weight: 700;
+  color: var(--cor-primaria-escura);
+}
+
+.card-produto-loja {
+  margin: 0;
+  font-size: var(--tamanho-pequeno);
+  color: var(--cor-texto-suave);
+}
+
 /* ---------- Campos de formulário ---------- */
 .formulario {
   display: grid;

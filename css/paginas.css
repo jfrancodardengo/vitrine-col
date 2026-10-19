@@ -1,0 +1,17 @@
+/* Ajustes específicos de cada página. Componentes genéricos ficam em componentes.css. */
+
+/* ---------- Catálogo (index.html) ---------- */
+.filtros {
+  display: grid;
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-5);
+  padding: var(--espaco-4);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+}
+
+.filtros-campos {
+  display: grid;
+  gap: var(--espaco-3);
+}
