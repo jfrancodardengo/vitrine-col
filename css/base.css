@@ -72,3 +72,54 @@ img {
   margin-inline: auto;
   padding-inline: var(--espaco-4);
 }
+
+/* Foco visível para quem navega pelo teclado */
+:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* O atributo hidden precisa vencer qualquer "display" definido nas classes (ex.: contador da sacola) */
+[hidden] {
+  display: none !important;
+}
+
+/* Texto só para leitores de tela */
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Link "Ir para o conteúdo": só aparece quando recebe o foco do teclado */
+.link-pular {
+  position: absolute;
+  left: var(--espaco-2);
+  top: -4rem;
+  z-index: 10;
+  padding: var(--espaco-2) var(--espaco-4);
+  background-color: var(--cor-superficie);
+  border-radius: var(--raio-pequeno);
+}
+
+.link-pular:focus {
+  top: var(--espaco-2);
+}
+
+.texto-suave {
+  color: var(--cor-texto-suave);
+}
+
+/* Respeita quem prefere menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
