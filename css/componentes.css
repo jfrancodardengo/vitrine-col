@@ -396,3 +396,55 @@ fieldset.campo legend {
   background-color: var(--cor-primaria);
   border-color: var(--cor-primaria);
 }
+
+/* ---------- Tablet ---------- */
+@media(min-width: 768px) {
+  .grade-produtos {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tabela thead {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+  }
+
+  .tabela tr {
+    display: table-row;
+    margin: 0;
+    border: 0;
+  }
+
+  .tabela th,
+  .tabela td {
+    padding: var(--espaco-3);
+    border-bottom: 1px solid var(--cor-borda);
+    text-align: left;
+  }
+
+  .tabela th {
+    background-color: var(--cor-primaria-clara);
+  }
+
+  .tabela td {
+    display: table-cell;
+  }
+
+  .tabela td::before {
+    content: none;
+  }
+
+  .tabela-acoes {
+    justify-content: flex-start;
+  }
+}
+
+/* ---------- Desktop ---------- */
+@media (min-width: 1024px) {
+  /* Quantas colunas cabem: 3 em telas menores do desktop, 4 nas largas */
+  .grade-produtos {
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  }
+}

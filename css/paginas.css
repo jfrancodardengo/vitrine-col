@@ -15,3 +15,143 @@
   display: grid;
   gap: var(--espaco-3);
 }
+
+/* ---------- Página da loja (loja.html) ---------- */
+.loja-resumo {
+  display: grid;
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-6);
+  padding: var(--espaco-4);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+}
+
+.loja-imagem {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--raio-pequeno);
+}
+
+.loja-dados {
+  margin: 0 0 var(--espaco-4);
+}
+
+.loja-dados dt {
+  font-weight: 700;
+}
+
+.loja-dados dd {
+  margin: 0 0 var(--espaco-2);
+}
+
+.loja-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+/* ---------- Página do produto (produto.html) ---------- */
+.produto-detalhe {
+  display: grid;
+  gap: var(--espaco-5);
+}
+
+.galeria-principal {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+}
+
+.galeria-miniaturas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-3);
+  list-style: none;
+}
+
+.miniatura {
+  width: 4.5rem;
+  padding: 0;
+  overflow: hidden;
+  background: none;
+  border: 3px solid transparent;
+  border-radius: var(--raio-pequeno);
+  cursor: pointer;
+}
+
+.miniatura[aria-current="true"] {
+  border-color: var(--cor-primaria);
+}
+
+.miniatura img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.produto-info .preco {
+  margin-bottom: var(--espaco-4);
+  font-size: var(--tamanho-grande);
+}
+
+.produto-compra {
+  display: grid;
+  gap: var(--espaco-4);
+  max-width: 24rem;
+}
+
+/* ---------- Login e cadastro ---------- */
+.cartao-formulario {
+  max-width: 28rem;
+  margin-inline: auto;
+  padding: var(--espaco-5);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+  box-shadow: var(--sombra-leve);
+}
+
+.cartao-formulario p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- Tablet ---------- */
+@media (min-width: 768px) {
+  .filtros-campos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .produto-detalhe {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
+  .pedido-atualizar {
+    grid-template-columns: 1fr 2fr;
+    align-items: start;
+  }
+
+  .tamanhos-estoque {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ---------- Desktop ---------- */
+@media (min-width: 1024px) {
+  main {
+    padding-block: var(--espaco-6);
+  }
+
+  .produto-detalhe {
+    gap: var(--espaco-6);
+  }
+
+  .sacola-layout {
+    max-width: 52rem;
+  }
+}
