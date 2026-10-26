@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cadastrar – VitrineCol</title>
+  <link rel="stylesheet" href="css/variaveis.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/paginas.css">
+</head>
+
+<body>
+  <a class="link-pular" href="#conteudo">Ir para o conteúdo</a>
+  <header class="cabecalho" id="cabecalho">
+    <div class="container cabecalho-conteudo">
+      <a class="logotipo" href="index.html">VitrineCol</a>
+      <nav aria-label="Principal">
+        <ul class="menu">
+          <li><a href="index.html">Início</a></li>
+          <li><a href="catalogo.html">Catálogo</a></li>
+          <li><a href="sacola.html">Sacola</a></li>
+          <li><a href="login.html">Entrar</a></li>
+          <li><a href="cadastro.html" aria-current="page">Cadastrar</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo" class="container">
+    <div class="cartao-formulario">
+      <h1>Cadastrar</h1>
+      <form class="formulario" id="formulario-cadastro" novalidate>
+        <div class="campo">
+          <label for="nome">Nome</label>
+          <input type="text" id="nome" name="nome" autocomplete="name" required>
+        </div>
+        <div class="campo">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" autocomplete="email" required>
+        </div>
+        <div class="campo">
+          <label for="senha">Senha</label>
+          <input type="password" id="senha" name="senha" autocomplete="new-password" minlength="6" required
+            aria-describedby="ajuda-senha">
+          <p class="campo-ajuda" id="ajuda-senha">Use pelo menos 6 caracteres.</p>
+        </div>
+        <div class="campo">
+          <label for="telefone">Telefone com DDD (opcional)</label>
+          <input type="tel" id="telefone" name="telefone" autocomplete="tel-national" inputmode="numeric"
+            placeholder="27 99999-9999" aria-describedby="ajuda-telefone">
+          <p class="campo-ajuda" id="ajuda-telefone">Com DDD, por exemplo 27 99999-9999. A loja usa para avisar você
+            pelo WhatsApp.</p>
+        </div>
+        <fieldset class="campo">
+          <legend>Quero me cadastrar como</legend>
+          <div class="opcoes">
+            <label class="opcao"><input type="radio" name="perfil" value="cliente" checked> Cliente</label>
+            <label class="opcao"><input type="radio" name="perfil" value="lojista"> Lojista</label>
+          </div>
+          <p class="campo-ajuda">O perfil não pode ser trocado depois.</p>
+        </fieldset>
+        <button type="submit" class="botao">Criar conta</button>
+      </form>
+      <p>Já tem conta? <a href="login.html" id="link-login">Entrar</a>.</p>
+      <p class="campo-ajuda">Coletamos só nome, e-mail e telefone opcional. Veja o <a href="privacidade.html">aviso de
+          privacidade</a>.</p>
+    </div>
+  </main>
+
+  <footer class="rodape">
+    <div class="container">
+      <ul class="rodape-links">
+        <li><a href="privacidade.html">Aviso de privacidade</a></li>
+        <li><a href="meus-pedidos.html">Meus pedidos</a></li>
+        <li><a href="painel-loja.html">Painel da loja</a></li>
+      </ul>
+      <p>Projeto integrador – Jovem Programadora (Senac). Pagamento e entrega são combinados direto com a loja.</p>
+    </div>
+  </footer>
+</body>
+
+</html>

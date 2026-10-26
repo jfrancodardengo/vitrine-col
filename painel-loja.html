@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minha loja – VitrineCol</title>
+  <link rel="stylesheet" href="css/variaveis.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/paginas.css">
+</head>
+
+<body>
+  <a class="link-pular" href="#conteudo">Ir para o conteúdo</a>
+  <header class="cabecalho" id="cabecalho">
+    <div class="container cabecalho-conteudo">
+      <a class="logotipo" href="index.html">VitrineCol</a>
+      <nav aria-label="Principal">
+        <ul class="menu">
+          <li><a href="index.html">Início</a></li>
+          <li><a href="catalogo.html">Catálogo</a></li>
+          <li><a href="sacola.html">Sacola</a></li>
+          <li><a href="login.html">Entrar</a></li>
+          <li><a href="cadastro.html">Cadastrar</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo" class="container">
+    <nav aria-label="Painel da lojista">
+      <ul class="navegacao-painel">
+        <li><a href="painel-loja.html" aria-current="page">Minha loja</a></li>
+        <li><a href="painel-produtos.html">Meus produtos</a></li>
+        <li><a href="painel-pedidos.html">Pedidos recebidos</a></li>
+      </ul>
+    </nav>
+
+    <div class="cartao-formulario">
+      <h1>Minha loja</h1>
+      <form class="formulario" id="formulario-loja" novalidate>
+        <div class="campo">
+          <label for="nome-loja">Nome da loja</label>
+          <input type="text" id="nome-loja" name="nome" required>
+        </div>
+        <div class="campo">
+          <label for="descricao-loja">Descrição (opcional)</label>
+          <textarea id="descricao-loja" name="descricao"></textarea>
+        </div>
+        <div class="campo">
+          <label for="endereco-loja">Endereço</label>
+          <input type="text" id="endereco-loja" name="endereco" autocomplete="street-address" required>
+        </div>
+        <div class="campo">
+          <label for="cidade-loja">Cidade</label>
+          <input type="text" id="cidade-loja" name="cidade" required>
+        </div>
+        <div class="campo">
+          <label for="whatsapp-loja">WhatsApp da loja</label>
+          <input type="tel" id="whatsapp-loja" name="whatsapp" placeholder="27 99999-9999" required
+            aria-describedby="ajuda-whatsapp">
+          <p class="campo-ajuda" id="ajuda-whatsapp">Com DDD, por exemplo 27 99999-9999. O sistema guarda só os números
+            e acrescenta o código 55 do Brasil.</p>
+        </div>
+        <div class="campo">
+          <label for="mapa-loja">Link do mapa (opcional)</label>
+          <input type="url" id="mapa-loja" name="link_mapa" placeholder="https://maps.google.com/..."
+            aria-describedby="ajuda-mapa">
+          <p class="campo-ajuda" id="ajuda-mapa">Copie o link da loja no Google Maps. Ele deve começar com https://.</p>
+        </div>
+        <button type="submit" class="botao">Salvar loja</button>
+      </form>
+    </div>
+  </main>
+
+  <footer class="rodape">
+    <div class="container">
+      <ul class="rodape-links">
+        <li><a href="privacidade.html">Aviso de privacidade</a></li>
+        <li><a href="meus-pedidos.html">Meus pedidos</a></li>
+        <li><a href="painel-loja.html">Painel da loja</a></li>
+      </ul>
+      <p>Projeto integrador – Jovem Programadora (Senac). Pagamento e entrega são combinados direto com a loja.</p>
+    </div>
+  </footer>
+</body>
+
+</html>

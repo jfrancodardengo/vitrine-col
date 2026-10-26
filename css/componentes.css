@@ -396,6 +396,88 @@ fieldset.campo legend {
   background-color: var(--cor-primaria);
   border-color: var(--cor-primaria);
 }
+/* ---------- Selos de status do pedido ---------- */
+.selo {
+  display: inline-block;
+  padding: var(--espaco-1) var(--espaco-3);
+  font-size: var(--tamanho-pequeno);
+  font-weight: 700;
+  border-radius: var(--raio-pilula);
+}
+
+.selo-novo {
+  color: var(--cor-info);
+  background-color: var(--cor-info-fundo);
+}
+
+.selo-confirmado {
+  color: var(--cor-sucesso);
+  background-color: var(--cor-sucesso-fundo);
+}
+
+.selo-concluido {
+  color: var(--cor-neutro);
+  background-color: var(--cor-neutro-fundo);
+}
+
+.selo-cancelado {
+  color: var(--cor-erro);
+  background-color: var(--cor-erro-fundo);
+}
+
+.selo-atualizado {
+  color: var(--cor-texto-sobre-primaria);
+  background-color: var(--cor-primaria);
+}
+
+/* ---------- Tabela (no celular cada linha vira um bloco, para não rolar na horizontal) ---------- */
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--cor-superficie);
+}
+
+.tabela thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.tabela tr {
+  display: block;
+  margin-bottom: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+}
+
+.tabela td {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-2) var(--espaco-4);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: right;
+}
+
+.tabela td:last-child {
+  border-bottom: 0;
+}
+
+.tabela td::before {
+  content: attr(data-rotulo);
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabela-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  justify-content: flex-end;
+}
 
 /* ---------- Tablet ---------- */
 @media(min-width: 768px) {

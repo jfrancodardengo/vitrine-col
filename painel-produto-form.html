@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cadastrar ou editar produto – VitrineCol</title>
+  <link rel="stylesheet" href="css/variaveis.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/paginas.css">
+</head>
+
+<body>
+  <a class="link-pular" href="#conteudo">Ir para o conteúdo</a>
+  <header class="cabecalho" id="cabecalho">
+    <div class="container cabecalho-conteudo">
+      <a class="logotipo" href="index.html">VitrineCol</a>
+      <nav aria-label="Principal">
+        <ul class="menu">
+          <li><a href="index.html">Início</a></li>
+          <li><a href="catalogo.html">Catálogo</a></li>
+          <li><a href="sacola.html">Sacola</a></li>
+          <li><a href="login.html">Entrar</a></li>
+          <li><a href="cadastro.html">Cadastrar</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo" class="container">
+    <nav aria-label="Painel da lojista">
+      <ul class="navegacao-painel">
+        <li><a href="painel-loja.html">Minha loja</a></li>
+        <li><a href="painel-produtos.html" aria-current="page">Meus produtos</a></li>
+        <li><a href="painel-pedidos.html">Pedidos recebidos</a></li>
+      </ul>
+    </nav>
+
+    <div class="cartao-formulario cartao-formulario-largo">
+      <h1 id="titulo-pagina">Cadastrar produto</h1>
+
+      <form class="formulario" id="formulario-produto" novalidate>
+        <div class="campo">
+          <label for="nome-produto">Nome</label>
+          <input type="text" id="nome-produto" name="nome" required>
+        </div>
+        <div class="campo">
+          <label for="descricao-produto">Descrição (opcional)</label>
+          <textarea id="descricao-produto" name="descricao"></textarea>
+        </div>
+        <div class="campo">
+          <label for="categoria-produto">Categoria</label>
+          <select id="categoria-produto" name="categoria" required>
+            <option value="">Escolha uma categoria</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="preco-produto">Preço (R$)</label>
+          <input type="number" id="preco-produto" name="preco" min="0.01" step="0.01" inputmode="decimal" required>
+        </div>
+
+        <fieldset class="campo">
+          <legend>Tamanhos e estoque</legend>
+          <div id="linhas-tamanhos">
+            <div class="linha-tamanho" role="group" aria-label="Tamanho e estoque, linha 1">
+              <div class="campo">
+                <label for="tamanho-1">Tamanho</label>
+                <input id="tamanho-1" type="text" list="sugestoes-tamanhos" required>
+              </div>
+              <div class="campo">
+                <label for="estoque-1">Estoque</label>
+                <input id="estoque-1" type="number" min="0" step="1" value="0" required>
+              </div>
+              <button type="button" class="botao botao-perigo botao-pequeno">Remover tamanho</button>
+            </div>
+          </div>
+          <button type="button" class="botao botao-secundario botao-pequeno" id="adicionar-tamanho">Adicionar
+            tamanho</button>
+          <p class="campo-ajuda">Use estoque 0 para o tamanho que acabou: ele aparece sem estoque para as clientes.</p>
+          <datalist id="sugestoes-tamanhos">
+            <option value="P"></option>
+            <option value="M"></option>
+            <option value="G"></option>
+            <option value="GG"></option>
+            <option value="38"></option>
+            <option value="40"></option>
+            <option value="42"></option>
+          </datalist>
+        </fieldset>
+
+        <div class="campo">
+          <label class="opcao" for="ativo-produto"><input type="checkbox" id="ativo-produto" name="ativo" checked>
+            Produto ativo (aparece no catálogo)</label>
+        </div>
+
+        <div class="acoes-formulario">
+          <button type="submit" class="botao">Salvar produto</button>
+          <a class="botao botao-secundario" href="painel-produtos.html">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="rodape">
+    <div class="container">
+      <ul class="rodape-links">
+        <li><a href="privacidade.html">Aviso de privacidade</a></li>
+        <li><a href="meus-pedidos.html">Meus pedidos</a></li>
+        <li><a href="painel-loja.html">Painel da loja</a></li>
+      </ul>
+      <p>Projeto integrador – Jovem Programadora (Senac). Pagamento e entrega são combinados direto com a loja.</p>
+    </div>
+  </footer>
+</body>
+
+</html>

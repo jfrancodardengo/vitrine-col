@@ -105,6 +105,75 @@
   max-width: 24rem;
 }
 
+/* ---------- Sacola (sacola.html) ---------- */
+.sacola-loja {
+  margin-bottom: var(--espaco-5);
+  padding: var(--espaco-4);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+}
+
+.sacola-itens {
+  list-style: none;
+}
+
+.sacola-item {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: var(--espaco-3);
+  padding-block: var(--espaco-3);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.sacola-item img {
+  width: 4.5rem;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: var(--raio-pequeno);
+}
+
+.sacola-item-nome {
+  margin: 0;
+  font-weight: 600;
+}
+
+.sacola-item-controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-2) var(--espaco-3);
+  margin-top: var(--espaco-2);
+}
+
+.sacola-item-controles input {
+  width: 4.5rem;
+  min-height: 2.5rem;
+  padding: var(--espaco-1) var(--espaco-2);
+  font: inherit;
+  border: 2px solid var(--cor-borda-campo);
+  border-radius: var(--raio-pequeno);
+}
+
+.sacola-subtotal {
+  margin: var(--espaco-3) 0 0;
+  text-align: right;
+  font-weight: 700;
+}
+
+.sacola-total {
+  margin-bottom: var(--espaco-4);
+  font-size: var(--tamanho-grande);
+  font-weight: 700;
+  text-align: right;
+}
+
+.sacola-whatsapp {
+  display: grid;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-6);
+}
+
 /* ---------- Login e cadastro ---------- */
 .cartao-formulario {
   max-width: 28rem;
@@ -118,6 +187,87 @@
 
 .cartao-formulario p:last-child {
   margin-bottom: 0;
+}
+
+/* ---------- Painel da lojista ---------- */
+.navegacao-painel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-5);
+  list-style: none;
+}
+
+.navegacao-painel a {
+  display: inline-block;
+  padding: var(--espaco-2) var(--espaco-4);
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--cor-primaria-escura);
+  background-color: var(--cor-superficie);
+  border: 2px solid var(--cor-primaria);
+  border-radius: var(--raio-pilula);
+}
+
+.navegacao-painel a[aria-current="page"] {
+  color: var(--cor-texto-sobre-primaria);
+  background-color: var(--cor-primaria);
+}
+
+.painel-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-4);
+}
+
+.painel-topo h1 {
+  margin: 0;
+}
+
+.tamanhos-estoque {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--espaco-3);
+}
+
+.fotos-gerenciar {
+  display: grid;
+  gap: var(--espaco-3);
+  list-style: none;
+}
+
+.foto-gerenciar {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: var(--espaco-3);
+  align-items: center;
+  padding: var(--espaco-3);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+}
+
+.foto-gerenciar img {
+  width: 4.5rem;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: var(--raio-pequeno);
+}
+
+.foto-gerenciar-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-2);
+}
+
+.pedido-atualizar {
+  display: grid;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-3);
 }
 
 /* ---------- Tablet ---------- */
@@ -153,5 +303,42 @@
 
   .sacola-layout {
     max-width: 52rem;
+  }
+}
+
+/* ---------- Painel: formulário do produto ---------- */
+.cartao-formulario-largo {
+  max-width: 42rem;
+}
+
+.painel-acoes {
+  margin: 0 0 var(--espaco-4);
+}
+
+.acoes-formulario {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+}
+
+/* Uma linha de tamanho: tamanho, estoque e o botão de remover */
+.linha-tamanho {
+  display: grid;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-3);
+  padding: var(--espaco-3);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+}
+
+#linhas-tamanhos {
+  margin-bottom: var(--espaco-3);
+}
+
+@media (min-width: 768px) {
+  .linha-tamanho {
+    grid-template-columns: 1fr 1fr auto;
+    align-items: end;
   }
 }
