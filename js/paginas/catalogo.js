@@ -1,8 +1,11 @@
-// Aula 17: funções, arrays e objetos. Os produtos são dados fictícios, só para treinar.
-// Cada produto é um objeto com as mesmas propriedades que a classe Produto terá (Aula 22).
+// Página do catálogo (Aula 18): o cabeçalho vem do JavaScript, os avisos aparecem na tela
+// e os chips de tipo de roupa reagem ao clique. Os produtos ainda são fictícios.
+import { montarCabecalho } from "../ui/cabecalho.js";
+import { mostrarCarregando, mostrarSucesso, limparAvisos } from "../ui/avisos.js";
+
 const produtosFicticios = [
   {
-    id: 1,
+    id: "p1",
     nome: "Vestido midi floral",
     descricao: "Tecido leve, ideal para o verão",
     preco: 129.9,
@@ -10,9 +13,9 @@ const produtosFicticios = [
     lojaId: "l1",
     lojaNome: "Loja Exemplo",
     tamanhos: [
-      { tamanho: "P", estoque: 3},
-      { tamanho: "M", estoque: 5},
-      { tamanho: "G", estoque: 2},
+      { tamanho: "P", estoque: 3 },
+      { tamanho: "M", estoque: 5 },
+      { tamanho: "G", estoque: 0 },
     ],
     fotos: ["imagens/exemplo-1.svg"],
   },
@@ -89,54 +92,26 @@ const produtosFicticios = [
     ],
     fotos: ["imagens/exemplo-6.svg"],
   },
-  {
-    id: "p7",
-    nome: "Jaqueta de couro",
-    descricao: "Modelo curto, com bolsos frontais",
-    preco: 219.9,
-    categoria: "Jaquetas",
-    lojaId: "l2",
-    lojaNome: "Loja do Bairro",
-    tamanhos: [
-      { tamanho: "M", estoque: 1 },
-      { tamanho: "G", estoque: 2 },
-    ],
-    fotos: ["imagens/exemplo-6.svg"],
-  }
 ];
 
-// Uma função pequena: recebe um produto e um tamanho e devolve true ou false
-function temEstoque(produto, tamanho) {
-  const item = produto.tamanhos.find((t) => t.tamanho === tamanho);
-  return item !== undefined && item.estoque > 0;
+const listaChips = document.getElementById("chips-categorias");
+
+// Só o chip escolhido fica "pressionado" (aria-pressed="true"); os outros voltam para false
+function escolherChip(chipEscolhido) {
+  listaChips.querySelectorAll(".chip").forEach((chip) => {
+    chip.setAttribute("aria-pressed", String(chip === chipEscolhido));
+  });
 }
 
-// Soma o estoque de todos os tamanhos de um produto
-function somarEstoque(produto) {
-  let total = 0;
-  for (const item of produto.tamanhos) {
-    total += item.estoque;
-  }
-  return total;
-}
+// Um "ouvinte" de clique em cada chip
+listaChips.querySelectorAll(".chip").forEach((chip) => {
+  chip.addEventListener("click", () => {
+    escolherChip(chip);
+    mostrarSucesso("Você escolheu: " + chip.textContent);
+  });
+});
 
-//Subtotal de uma linha da sacola (preço vezes quantidade)
-function calcularSubtotal(preco, quantidade) {
-  return preco * quantidade;
-}
-
-// Percorre a lista com for...of e mostra um resumo de cada produto no Console
-for (const produto of produtosFicticios) {
-  console.log(produto.nome + " (" + produto.lojaNome + "): estoque total " + somarEstoque(produto));
-}
-
-function calcularDesconto(preco, percentual) {
-  let precoComDesconto = 0;
-  precoComDesconto = preco * (1 - (percentual/100));
-  return precoComDesconto;
-}
-
-console.log("Vestido tem estoque no G?", temEstoque(produtosFicticios[0], "G"));
-console.log("Duas camisetas custam", calcularSubtotal(produtosFicticios[1].preco, 2).toFixed(2));
-console.log("Preço com desconto", calcularDesconto(129.9, 20).toFixed(2));
-console.log(produtosFicticios[produtosFicticios.length - 1].nome)
+montarCabecalho();
+mostrarCarregando();
+// Depois de um tempinho o aviso de "Carregando…" some (na Aula 19 isto vira a espera pelos dados)
+setTimeout(limparAvisos, 1500);
