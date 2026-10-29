@@ -1,7 +1,8 @@
-// Página do catálogo (Aula 18): o cabeçalho vem do JavaScript, os avisos aparecem na tela
-// e os chips de tipo de roupa reagem ao clique. Os produtos ainda são fictícios.
+// Página do catálogo: mostra os produtos e aplica os filtros. Por enquanto os produtos são fictícios (escritos neste arquivo).
 import { montarCabecalho } from "../ui/cabecalho.js";
-import { mostrarCarregando, mostrarSucesso, limparAvisos } from "../ui/avisos.js";
+import { mostrarCarregando, limparAvisos } from "../ui/avisos.js";
+import { criarElemento } from "../ui/elementos.js";
+import { formatarPreco } from "../ui/formatadores.js";
 
 const produtosFicticios = [
   {
@@ -94,24 +95,56 @@ const produtosFicticios = [
   },
 ];
 
-const listaChips = document.getElementById("chips-categorias");
+const listaProdutos = document.getElementById("lista-produtos");
+const mensagemVazio = document.getElementById("mensagem-vazio");
 
-// Só o chip escolhido fica "pressionado" (aria-pressed="true"); os outros voltam para false
-function escolherChip(chipEscolhido) {
-  listaChips.querySelectorAll(".chip").forEach((chip) => {
-    chip.setAttribute("aria-pressed", String(chip === chipEscolhido));
-  });
+// Monta o card de UM produto só com o DOM (createElement + textContent), nunca com innerHTML (RNF-06).
+// Devolve um <li> pronto para entrar na lista do catálogo.
+function criarCardProduto(produto) {
+  const item = document.createElement("li");
+  const card = criarElemento("article", "card-produto");
+
+  // Sem foto, usa a imagem padrão
+  const imagem = criarElemento("img", "card-produto-imagem");
+  imagem.src = produto.fotos[0] ?? "imagens/sem-foto.svg";
+  imagem.alt = "Foto de " + produto.nome;
+  imagem.width = 600;
+  imagem.height = 750;
+  imagem.loading = "lazy";
+
+  const corpo = criarElemento("div", "card-produto-corpo");
+  
+  const titulo = criarElemento("h3", "card-produto-titulo");
+  const link = criarElemento("a", "", produto.nome);
+  link.href = "produto.html?id=" + encodeURIComponent(produto.id);
+  titulo.append(link);
+  
+  const preco = criarElemento("p", "preco", formatarPreco(produto.preco));
+  const loja = criarElemento("p", "card-produto-loja", produto.lojaNome);
+
+  corpo.append(titulo, preco, loja);
+  card.append(imagem, corpo);
+  item.append(card);
+
+  return item;
 }
 
-// Um "ouvinte" de clique em cada chip
-listaChips.querySelectorAll(".chip").forEach((chip) => {
-  chip.addEventListener("click", () => {
-    escolherChip(chip);
-    mostrarSucesso("Você escolheu: " + chip.textContent);
-  });
-});
+// Apaga os cards antigos e desenha os novos.
+// Estado vazio: sem produto, aparece o aviso em vez de uma tela em branco.
+function mostrarProdutos(produtos) {
+  listaProdutos.replaceChildren(...produtos.map(criarCardProduto));
+  mensagemVazio.hidden = produtos.length > 0;
+}
 
-montarCabecalho();
-mostrarCarregando();
-// Depois de um tempinho o aviso de "Carregando…" some (na Aula 19 isto vira a espera pelos dados)
-setTimeout(limparAvisos, 1500);
+function iniciar() {
+  montarCabecalho();
+  mostrarCarregando();
+
+  // O setTimeout finge a espera pelos dados; na Aula 28 ela vira uma espera de verdade
+  setTimeout(() => {
+    mostrarProdutos(produtosFicticios);
+    limparAvisos();
+  }, 600);
+}
+
+iniciar();
