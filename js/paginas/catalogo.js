@@ -97,6 +97,52 @@ const produtosFicticios = [
 
 const listaProdutos = document.getElementById("lista-produtos");
 const mensagemVazio = document.getElementById("mensagem-vazio");
+const campoBusca = document.getElementById("busca");
+const selectLoja = document.getElementById("filtro-loja");
+const selectTamanho = document.getElementById("filtro-tamanho");
+const formularioFiltros = document.querySelector(".filtros");
+const listaChips = document.getElementById("chips-categorias");
+
+// Dados fictícios das lojas e dos tipos de roupa (na Aula 29 eles passam a vir do banco)
+const lojasFicticias = [
+  { id: "l1", nome: "Loja Exemplo" },
+  { id: "l2", nome: "Loja do Bairro" },
+];
+const categoriasFicticias = ["Blusas", "Camisetas", "Vestidos", "Calças", "Saias", "Shorts", "Jaquetas", "Acessórios"];
+
+// Valor atual de cada filtro. Texto vazio ("") significa "sem filtro".
+const filtros = {
+  busca: "",
+  categoria: "",
+  lojaId: "",
+  tamanho: "",
+};
+
+// RF-04: o tamanho só serve se existir E tiver estoque maior que zero
+function temEstoque(produto, tamanho) {
+  const item = produto.tamanhos.find((t) => t.tamanho === tamanho);
+  return item !== undefined && item.estoque > 0;
+}
+
+// Devolve só os produtos que passam em TODOS os filtros que estão ligados (RF-02, RF-03, RF-04 e a busca pelo nome)
+function filtrarProdutos(produtos, filtros) {
+  return produtos.filter((produto) => {
+    if (filtros.categoria && produto.categoria !== filtros.categoria) {
+      return false;
+    }
+    if (filtros.lojaId && produto.lojaId !== filtros.lojaId) {
+      return false;
+    }
+    if (filtros.tamanho && !temEstoque(produto, filtros.tamanho)) {
+      return false;
+    }
+    // includes: o nome contém o texto digitado; toLowerCase ignora maiúsculas e minúsculas
+    if (filtros.busca && !produto.nome.toLowerCase().includes(filtros.busca.trim().toLowerCase())) {
+      return false;
+    }
+    return true;
+  });
+}
 
 // Monta o card de UM produto só com o DOM (createElement + textContent), nunca com innerHTML (RNF-06).
 // Devolve um <li> pronto para entrar na lista do catálogo.
@@ -136,13 +182,81 @@ function mostrarProdutos(produtos) {
   mensagemVazio.hidden = produtos.length > 0;
 }
 
+// Aplica os filtros atuais e redesenha a lista
+function atualizarCatalogo() {
+  mostrarProdutos(filtrarProdutos(produtosFicticios, filtros));
+}
+
+// Cria um chip para cada tipo de roupa, depois do chip "Todas" (que já está no HTML)
+function preencherCategorias(categorias) {
+  categorias.forEach((categoria) => {
+    const item = document.createElement("li");
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.setAttribute("aria-pressed", "false");
+    chip.textContent = categoria;
+    chip.addEventListener("click", () => escolherCategoria(chip, categoria));
+
+    item.append(chip);
+    listaChips.append(item);
+  });
+}
+
+// Cria uma opção para cada loja
+function preencherLojas(lojas) {
+  lojas.forEach((loja) => {
+    const opcao = document.createElement("option");
+    opcao.value = loja.id;
+    opcao.textContent = loja.nome;
+    selectLoja.append(opcao);
+  });
+}
+
+function escolherCategoria(chipEscolhido, categoria) {
+  // Só o chip escolhido fica "pressionado"; "Todas" limpa o filtro (RF-02)
+  listaChips.querySelectorAll(".chip").forEach((chip) => {
+    chip.setAttribute("aria-pressed", String(chip === chipEscolhido));
+  });
+
+  filtros.categoria = categoria;
+  atualizarCatalogo();
+}
+
+function configurarFiltros() {
+  // O chip "Todas" já está no HTML; os outros foram criados por preencherCategorias()
+  const chipTodas = listaChips.querySelector(".chip");
+  chipTodas.addEventListener("click", () => escolherCategoria(chipTodas, ""));
+
+  campoBusca.addEventListener("input", () => {
+    filtros.busca = campoBusca.value;
+    atualizarCatalogo();
+  });
+
+  selectLoja.addEventListener("change", () => {
+    filtros.lojaId = selectLoja.value;
+    atualizarCatalogo();
+  });
+
+  selectTamanho.addEventListener("change", () => {
+    filtros.tamanho = selectTamanho.value;
+    atualizarCatalogo();
+  });
+
+  // Apertar Enter na busca enviaria o formulário e recarregaria a página; aqui isso não é preciso
+  formularioFiltros.addEventListener("submit", (evento) => evento.preventDefault());
+}
+
 function iniciar() {
   montarCabecalho();
   mostrarCarregando();
 
   // O setTimeout finge a espera pelos dados; na Aula 28 ela vira uma espera de verdade
   setTimeout(() => {
-    mostrarProdutos(produtosFicticios);
+    preencherCategorias(categoriasFicticias);
+    preencherLojas(lojasFicticias);
+    configurarFiltros();
+    atualizarCatalogo();
     limparAvisos();
   }, 600);
 }
