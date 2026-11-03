@@ -2,7 +2,8 @@
 import { montarCabecalho } from "../ui/cabecalho.js";
 import { mostrarCarregando, limparAvisos } from "../ui/avisos.js";
 import { criarElemento } from "../ui/elementos.js";
-import { formatarPreco } from "../ui/formatadores.js";
+import { Produto } from "../modelos/Produto.js";
+import { Loja } from "../modelos/Loja.js";
 
 const produtosFicticios = [
   {
@@ -104,10 +105,26 @@ const formularioFiltros = document.querySelector(".filtros");
 const listaChips = document.getElementById("chips-categorias");
 
 // Dados fictícios das lojas e dos tipos de roupa (na Aula 29 eles passam a vir do banco)
-const lojasFicticias = [
-  { id: "l1", nome: "Loja Exemplo" },
-  { id: "l2", nome: "Loja do Bairro" },
+const lojas = [
+  new Loja({
+    id: "l1",
+    nome: "Loja Exemplo",
+    descricao: "Moda feminina casual e confortável",
+    endereco: "Rua das Flores, 100, Centro",
+    cidade: "Cidade Exemplo",
+    whatsapp: "5527999999999",
+  }),
+  new Loja({
+    id: "l2",
+    nome: "Loja do Bairro",
+    endereco: "Avenida Central, 250",
+    cidade: "Cidade Exemplo",
+    whatsapp: "5527988888888",
+  }),
 ];
+
+// Cada produto fictício vira um objeto Produto: as regras de preço e estoque ficam dentro da classe
+const produtos = produtosFicticios.map((dados) => new Produto(dados));
 const categoriasFicticias = ["Blusas", "Camisetas", "Vestidos", "Calças", "Saias", "Shorts", "Jaquetas", "Acessórios"];
 
 // Valor atual de cada filtro. Texto vazio ("") significa "sem filtro".
@@ -118,12 +135,6 @@ const filtros = {
   tamanho: "",
 };
 
-// RF-04: o tamanho só serve se existir E tiver estoque maior que zero
-function temEstoque(produto, tamanho) {
-  const item = produto.tamanhos.find((t) => t.tamanho === tamanho);
-  return item !== undefined && item.estoque > 0;
-}
-
 // Devolve só os produtos que passam em TODOS os filtros que estão ligados (RF-02, RF-03, RF-04 e a busca pelo nome)
 function filtrarProdutos(produtos, filtros) {
   return produtos.filter((produto) => {
@@ -133,7 +144,7 @@ function filtrarProdutos(produtos, filtros) {
     if (filtros.lojaId && produto.lojaId !== filtros.lojaId) {
       return false;
     }
-    if (filtros.tamanho && !temEstoque(produto, filtros.tamanho)) {
+    if (filtros.tamanho && !produto.temEstoque(filtros.tamanho)) {
       return false;
     }
     // includes: o nome contém o texto digitado; toLowerCase ignora maiúsculas e minúsculas
@@ -150,9 +161,9 @@ function criarCardProduto(produto) {
   const item = document.createElement("li");
   const card = criarElemento("article", "card-produto");
 
-  // Sem foto, usa a imagem padrão
+  // fotoCapa() devolve a primeira foto, ou a imagem padrão quando o produto não tem foto
   const imagem = criarElemento("img", "card-produto-imagem");
-  imagem.src = produto.fotos[0] ?? "imagens/sem-foto.svg";
+  imagem.src = produto.fotoCapa();
   imagem.alt = "Foto de " + produto.nome;
   imagem.width = 600;
   imagem.height = 750;
@@ -165,7 +176,7 @@ function criarCardProduto(produto) {
   link.href = "produto.html?id=" + encodeURIComponent(produto.id);
   titulo.append(link);
   
-  const preco = criarElemento("p", "preco", formatarPreco(produto.preco));
+  const preco = criarElemento("p", "preco", produto.precoFormatado());
   const loja = criarElemento("p", "card-produto-loja", produto.lojaNome);
 
   corpo.append(titulo, preco, loja);
@@ -184,7 +195,7 @@ function mostrarProdutos(produtos) {
 
 // Aplica os filtros atuais e redesenha a lista
 function atualizarCatalogo() {
-  mostrarProdutos(filtrarProdutos(produtosFicticios, filtros));
+    mostrarProdutos(filtrarProdutos(produtos, filtros));
 }
 
 // Cria um chip para cada tipo de roupa, depois do chip "Todas" (que já está no HTML)
@@ -254,7 +265,7 @@ function iniciar() {
   // O setTimeout finge a espera pelos dados; na Aula 28 ela vira uma espera de verdade
   setTimeout(() => {
     preencherCategorias(categoriasFicticias);
-    preencherLojas(lojasFicticias);
+    preencherLojas(lojas);
     configurarFiltros();
     atualizarCatalogo();
     limparAvisos();
