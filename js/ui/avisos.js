@@ -54,3 +54,60 @@ export function limparAvisos() {
     area.replaceChildren();
   }
 }
+
+// ---------- Erros ao lado de cada campo de formulário ----------
+
+// Mostra a mensagem logo abaixo do campo e liga a mensagem ao campo (aria-describedby),
+// para o leitor de tela ler o erro junto com o nome do campo.
+export function mostrarErroDoCampo(campo, mensagem) {
+  const idDoErro = "erro-" + campo.id;
+  let erro = document.getElementById(idDoErro);
+
+  if (!erro) {
+    erro = document.createElement("p");
+    erro.id = idDoErro;
+    erro.className = "campo-erro";
+    campo.closest(".campo").append(erro);
+  }
+  erro.textContent = mensagem;
+
+  campo.setAttribute("aria-invalid", "true");
+  const descricoes = (campo.getAttribute("aria-describedby") ?? "").split(" ").filter(Boolean);
+  if (!descricoes.includes(idDoErro)) {
+    descricoes.push(idDoErro);
+    campo.setAttribute("aria-describedby", descricoes.join(" "));
+  }
+}
+
+// Apaga todas as mensagens de erro de campo do formulário (chamar antes de validar de novo).
+export function limparErrosDosCampos(formulario) {
+  formulario.querySelectorAll(".campo-erro").forEach((erro) => erro.remove());
+
+  formulario.querySelectorAll("[aria-invalid]").forEach((campo) => {
+    campo.removeAttribute("aria-invalid");
+
+    // Tira só o que era do erro; as dicas fixas (ex.: "Use pelo menos 6 caracteres") continuam
+    const restantes = (campo.getAttribute("aria-describedby") ?? "")
+    .split(" ")
+    .filter((id) => id && !id.startsWith("erro-"));
+    if (restantes.length > 0) {
+      campo.setAttribute("aria-describedby", restantes.join(" "));
+    } else {
+      campo.removeAttribute("aria-describedby");
+    }
+  });
+}
+
+// Apaga a mensagem de erro de um campo só (os outros erros continuam na tela).
+export function limparErroDoCampo(campo) {
+  const idDoErro = "erro-" + campo.id;
+  document.getElementById(idDoErro)?.remove();
+  campo.removeAttribute("aria-invalid");
+
+  const restantes = (campo.getAttribute("aria-describedby") ?? "").split(" ").filter((id) => id && id !== idDoErro);
+  if (restantes.length > 0) {
+    campo.setAttribute("aria-describedby", restantes.join(" "));
+  } else {
+    campo.removeAttribute("aria-describedby");
+  }
+}

@@ -530,3 +530,17 @@ fieldset.campo legend {
     grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
   }
 }
+
+/* ---------- Erro ao lado de um campo de formulário ---------- */
+.campo-erro {
+  margin: 0;
+  font-size: var(--tamanho-pequeno);
+  font-weight: 600;
+  color: var(--cor-erro);
+}
+
+.campo input[aria-invalid="true"],
+.campo select[aria-invalid="true"],
+.campo textarea[aria-invalid="true"] {
+  border-color: var(--cor-erro);
+}
