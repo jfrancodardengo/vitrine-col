@@ -125,6 +125,12 @@ const lojas = [
 
 // Cada produto fictício vira um objeto Produto: as regras de preço e estoque ficam dentro da classe
 const produtos = produtosFicticios.map((dados) => new Produto(dados));
+
+// Agregação: cada produto entra na lista da sua loja (a Loja TEM Produtos)
+produtos.forEach((produto) => {
+  const loja = lojas.find((outra) => outra.id === produto.lojaId);
+  loja.adicionarProduto(produto);
+});
 const categoriasFicticias = ["Blusas", "Camisetas", "Vestidos", "Calças", "Saias", "Shorts", "Jaquetas", "Acessórios"];
 
 // Valor atual de cada filtro. Texto vazio ("") significa "sem filtro".
@@ -193,9 +199,10 @@ function mostrarProdutos(produtos) {
   mensagemVazio.hidden = produtos.length > 0;
 }
 
-// Aplica os filtros atuais e redesenha a lista
+// Aplica os filtros atuais e redesenha a lista. Só os produtos ATIVOS de cada loja entram (RN-08)
 function atualizarCatalogo() {
-    mostrarProdutos(filtrarProdutos(produtos, filtros));
+  const produtosAtivos = lojas.flatMap((loja) => loja.produtosAtivos());
+  mostrarProdutos(filtrarProdutos(produtosAtivos, filtros));
 }
 
 // Cria um chip para cada tipo de roupa, depois do chip "Todas" (que já está no HTML)
