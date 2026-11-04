@@ -1,4 +1,5 @@
 // Avisos de carregamento, erro e sucesso (RF-21).
+import { ErroApp } from "../modelos/ErroApp.js";
 
 // Há uma única área de avisos por página, logo abaixo do título (h1), e só um aviso aparece por vez:
 // o aviso novo substitui o anterior, assim "Carregando…" some quando o resultado chega.
@@ -53,6 +54,23 @@ export function limparAvisos() {
   if (area) {
     area.replaceChildren();
   }
+}
+
+// O ErroApp já vira mensagem na tela, então só o detalhe técnico (a causa) vai para o console, para quem depura.
+// Um erro inesperado (que não é ErroApp) sempre vai para o console como erro.
+export function registrarErro(erro) {
+  if (!(erro instanceof ErroApp)) {
+    console.error(erro);
+  } else if (erro.cause) {
+    console.warn(erro.codigo, erro.cause);
+  }
+}
+
+// Mostra a mensagem pronta do ErroApp; qualquer outro erro inesperado recebe uma mensagem geral.
+export function mensagemDoErro(erro) {
+  return erro instanceof ErroApp
+    ? erro.mensagemParaUsuaria
+    : "Algo deu errado. Recarregue a página e tente novamente.";
 }
 
 // ---------- Erros ao lado de cada campo de formulário ----------

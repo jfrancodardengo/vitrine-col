@@ -1,7 +1,7 @@
 // Página do catálogo: mostra os produtos e aplica os filtros. Por enquanto os produtos são fictícios (escritos neste arquivo).
 import { montarCabecalho } from "../ui/cabecalho.js";
-import { mostrarCarregando, limparAvisos } from "../ui/avisos.js";
-import { criarElemento } from "../ui/elementos.js";
+import { mostrarCarregando, mostrarErro, limparAvisos, mensagemDoErro, registrarErro } from "../ui/avisos.js";
+import { criarCardProduto } from "../ui/cards.js";
 import { Produto } from "../modelos/Produto.js";
 import { Loja } from "../modelos/Loja.js";
 
@@ -104,33 +104,9 @@ const selectTamanho = document.getElementById("filtro-tamanho");
 const formularioFiltros = document.querySelector(".filtros");
 const listaChips = document.getElementById("chips-categorias");
 
-// Dados fictícios das lojas e dos tipos de roupa (na Aula 29 eles passam a vir do banco)
-const lojas = [
-  new Loja({
-    id: "l1",
-    nome: "Loja Exemplo",
-    descricao: "Moda feminina casual e confortável",
-    endereco: "Rua das Flores, 100, Centro",
-    cidade: "Cidade Exemplo",
-    whatsapp: "5527999999999",
-  }),
-  new Loja({
-    id: "l2",
-    nome: "Loja do Bairro",
-    endereco: "Avenida Central, 250",
-    cidade: "Cidade Exemplo",
-    whatsapp: "5527988888888",
-  }),
-];
+// As lojas (cada uma com os seus produtos) são criadas dentro de iniciar(), para um erro nos dados poder ser tratado
+let lojas = [];
 
-// Cada produto fictício vira um objeto Produto: as regras de preço e estoque ficam dentro da classe
-const produtos = produtosFicticios.map((dados) => new Produto(dados));
-
-// Agregação: cada produto entra na lista da sua loja (a Loja TEM Produtos)
-produtos.forEach((produto) => {
-  const loja = lojas.find((outra) => outra.id === produto.lojaId);
-  loja.adicionarProduto(produto);
-});
 const categoriasFicticias = ["Blusas", "Camisetas", "Vestidos", "Calças", "Saias", "Shorts", "Jaquetas", "Acessórios"];
 
 // Valor atual de cada filtro. Texto vazio ("") significa "sem filtro".
@@ -159,37 +135,6 @@ function filtrarProdutos(produtos, filtros) {
     }
     return true;
   });
-}
-
-// Monta o card de UM produto só com o DOM (createElement + textContent), nunca com innerHTML (RNF-06).
-// Devolve um <li> pronto para entrar na lista do catálogo.
-function criarCardProduto(produto) {
-  const item = document.createElement("li");
-  const card = criarElemento("article", "card-produto");
-
-  // fotoCapa() devolve a primeira foto, ou a imagem padrão quando o produto não tem foto
-  const imagem = criarElemento("img", "card-produto-imagem");
-  imagem.src = produto.fotoCapa();
-  imagem.alt = "Foto de " + produto.nome;
-  imagem.width = 600;
-  imagem.height = 750;
-  imagem.loading = "lazy";
-
-  const corpo = criarElemento("div", "card-produto-corpo");
-  
-  const titulo = criarElemento("h3", "card-produto-titulo");
-  const link = criarElemento("a", "", produto.nome);
-  link.href = "produto.html?id=" + encodeURIComponent(produto.id);
-  titulo.append(link);
-  
-  const preco = criarElemento("p", "preco", produto.precoFormatado());
-  const loja = criarElemento("p", "card-produto-loja", produto.lojaNome);
-
-  corpo.append(titulo, preco, loja);
-  card.append(imagem, corpo);
-  item.append(card);
-
-  return item;
 }
 
 // Apaga os cards antigos e desenha os novos.
@@ -265,17 +210,57 @@ function configurarFiltros() {
   formularioFiltros.addEventListener("submit", (evento) => evento.preventDefault());
 }
 
+// Os dados continuam fictícios. Devolve as lojas já com os seus produtos; se algum dado for inválido,
+// o Produto ou a Loja lançam um ErroApp, e quem chamou decide o que mostrar na tela.
+function carregarLojasFicticias() {
+  const lojasCriadas = [
+    new Loja({
+      id: "l1",
+      nome: "Loja Exemplo",
+      descricao: "Moda feminina casual e confortável",
+      endereco: "Rua das Flores, 100, Centro",
+      cidade: "Cidade Exemplo",
+      whatsapp: "5527999999999",
+    }),
+    new Loja({
+      id: "l2",
+      nome: "Loja do Bairro",
+      endereco: "Avenida Central, 250",
+      cidade: "Cidade Exemplo",
+      whatsapp: "5527988888888",
+    }),
+  ];
+
+  // Cada produto fictício vira um objeto Produto: as regras de preço e estoque ficam dentro da classe
+  const produtos = produtosFicticios.map((dados) => new Produto(dados));
+
+  // Agregação: cada produto entra na lista da sua loja (a Loja TEM Produtos)
+  produtos.forEach((produto) => {
+    const loja = lojasCriadas.find((outra) => outra.id === produto.lojaId);
+    loja.adicionarProduto(produto);
+  });
+
+  return lojasCriadas;
+}
+
 function iniciar() {
   montarCabecalho();
   mostrarCarregando();
 
   // O setTimeout finge a espera pelos dados; na Aula 28 ela vira uma espera de verdade
   setTimeout(() => {
-    preencherCategorias(categoriasFicticias);
-    preencherLojas(lojas);
-    configurarFiltros();
-    atualizarCatalogo();
-    limparAvisos();
+    try {
+      lojas = carregarLojasFicticias();
+      preencherCategorias(categoriasFicticias);
+      preencherLojas(lojas);
+      configurarFiltros();
+      atualizarCatalogo();
+      limparAvisos();
+    } catch (erro) {
+      // Um dado inválido (ErroApp) ou um erro inesperado: mensagem em português em vez de tela em branco (RF-21)
+      registrarErro(erro);
+      mostrarErro(mensagemDoErro(erro));
+    }
   }, 600);
 }
 
