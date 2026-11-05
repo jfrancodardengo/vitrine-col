@@ -47,6 +47,25 @@ export class Produto {
     fotos.forEach((endereco) => this.adicionarFoto(endereco));
   }
 
+  // Monta um Produto a partir de uma linha do banco (colunas em snake_case, com as tabelas relacionadas dentro).
+  // As fotos são ordenadas pela coluna "ordem": a de menor ordem é a capa (RN-12).
+  static deLinha(linha) {
+    const fotosEmOrdem = [...(linha.produto_fotos ?? [])].sort((a, b) => a.ordem - b.ordem);
+
+    return new Produto({
+      id: linha.id,
+      nome: linha.nome,
+      descricao: linha.descricao ?? "",
+      preco: linha.preco,
+      categoria: linha.categorias?.nome ?? "",
+      lojaId: linha.loja_id,
+      lojaNome: linha.lojas?.nome ?? "",
+      ativo: linha.ativo,
+      tamanhos: linha.tamanhos ?? [],
+      fotos: fotosEmOrdem.map((foto) => foto.url),
+    });
+  }
+
   // ---------- Leitura ----------
 
   get id() {

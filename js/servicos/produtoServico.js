@@ -1,5 +1,41 @@
 // Fala com o banco sobre produtos. Devolve as linhas do banco ou lança ErroApp.
-// (Na Aula 21 o arquivo só tem as regras de validação do formulário; as consultas ao banco chegam a partir da Aula 29.)
+// Transformar as linhas em objetos Produto é trabalho da página (veja catalogo.js).
+import { exigirSupabase } from "../supabaseClient.js";
+import { ErroApp } from "../modelos/ErroApp.js";
+
+// Colunas do produto e das tabelas relacionadas. Em "categorias ( id, nome )" o Supabase junta,
+// em uma só consulta, a categoria do produto (é só uma, então vem como objeto).
+const CAMPOS_DO_PRODUTO = "id, nome, descricao, preco, ativo, loja_id, categoria_id, categorias ( id, nome ), lojas ( id, nome )";
+const CAMPOS_DAS_FOTOS = "produto_fotos ( id, url, ordem )";
+
+// Lista TODOS os produtos ativos (RN-08), cada um com a categoria, a loja, os tamanhos e as fotos já em ordem (a primeira é a capa, RN-12).
+// Na Aula 30 esta função ganha filtros e páginas.
+export async function listarProdutosAtivos() {
+  try {
+    const supabase = exigirSupabase();
+    const { data, error } = await supabase
+      .from("produtos")
+      .select(CAMPOS_DO_PRODUTO + ", tamanhos ( tamanho, estoque ), " + CAMPOS_DAS_FOTOS)
+      // RN-08: produto inativo não aparece
+      .eq("ativo", true)
+      .order("nome")
+      .order("ordem", { referencedTable: "produto_fotos", ascending: true });
+
+    if (error) {
+      throw error;
+    }
+    return data;
+  } catch (erro) {
+    // Um ErroApp já tem mensagem pronta; qualquer outro erro vira um ErroApp em português
+    throw erro instanceof ErroApp
+      ? erro
+      : new ErroApp(
+          "erro_ao_listar_produtos",
+          "Não foi possível carregar os produtos. Verifique sua conexão e tente novamente.",
+          erro
+        );
+  }
+}
 
 // =====================================================================
 // Painel da lojista (RF-16 a RF-19): cadastrar, editar, ativar/desativar e excluir produtos.
