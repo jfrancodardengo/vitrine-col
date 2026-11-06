@@ -342,3 +342,9 @@
     align-items: end;
   }
 }
+
+/* ---------- Botão "Carregar mais" do catálogo ---------- */
+.paginacao {
+  margin-top: var(--espaco-5);
+  text-align: center;
+}
