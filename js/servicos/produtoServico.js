@@ -2,6 +2,8 @@
 // Transformar as linhas em objetos Produto é trabalho da página (veja catalogo.js).
 import { exigirSupabase } from "../supabaseClient.js";
 import { ErroApp } from "../modelos/ErroApp.js";
+import { Produto } from "../modelos/Produto.js";
+import { paraErroApp } from "./errosSupabase.js";
 
 // Colunas do produto e das tabelas relacionadas. Em "categorias ( id, nome )" o Supabase junta,
 // em uma só consulta, a categoria do produto (é só uma, então vem como objeto).
@@ -157,4 +159,71 @@ export function validarProduto({ nome, categoriaId, preco, tamanhos = [] }) {
   });
 
   return erros;
+}
+
+// Monta a linha da tabela produtos e as linhas de tamanhos a partir dos dados do formulário.
+function montarLinhas(dados) {
+  return {
+    linhaDoProduto: {
+      loja_id: dados.lojaId,
+      categoria_id: Number(dados.categoriaId), // o <select> entrega texto; a coluna é número
+      nome: dados.nome.trim(),
+      descricao: String(dados.descricao ?? "").trim() === "" ? null : dados.descricao.trim(),
+      preco: converterPreco(dados.preco),
+      ativo: dados.ativo !== false,
+    },
+    linhasDeTamanhos: dados.tamanhos.map((linha) => ({
+      tamanho: normalizarTamanho(linha.tamanho),
+      estoque: Number(linha.estoque),
+    })),
+  };
+}
+
+// Última defesa: o modelo Produto confere RN-02 e RN-12 de novo e lança ErroApp se algo escapou da tela.
+function conferirComOModelo(dados) {
+  new Produto({
+    id: dados.id,
+    nome: dados.nome,
+    preco: converterPreco(dados.preco),
+    categoria: String(dados.categoriaId),
+    lojaId: dados.lojaId,
+    tamanhos: dados.tamanhos.map((linha) => ({ tamanho: normalizarTamanho(linha.tamanho), estoque: linha.estoque })),
+    fotos: dados.fotos.map((foto) => foto.url ?? "foto-nova"),
+  });
+}
+
+// Cria o produto e os tamanhos (RF-16). As fotos entram na Aula 33.
+// "dados.id" é gerado no navegador (crypto.randomUUID()) ANTES do envio.
+// Passos: 1) grava o produto; 2) grava os tamanhos. Se algo falhar, desfaz o que foi feito.
+export async function criarProduto(dados) {
+  let produtoGravado = false;
+
+  try {
+    ErroApp.lancarSeHouverErros(validarProduto(dados));
+    conferirComOModelo(dados);
+    const supabase = exigirSupabase();
+    const { linhaDoProduto, linhasDeTamanhos } = montarLinhas(dados);
+
+    const { error: erroDoProduto } = await supabase.from("produtos").insert({ id: dados.id, ...linhaDoProduto });
+    if (erroDoProduto) {
+      throw erroDoProduto;
+    }
+    produtoGravado = true;
+
+    const { error: erroDosTamanhos } = await supabase
+      .from("tamanhos")
+      .insert(linhasDeTamanhos.map((linha) => ({ produto_id: dados.id, ...linha })));
+    if (erroDosTamanhos) {
+      throw erroDosTamanhos;
+    }
+
+    return dados.id;
+  } catch (erro) {
+    // Desfaz: sem os tamanhos, é melhor não deixar o produto pela metade
+    // (apagar o produto também apaga, em cascata, os tamanhos ligados a ele)
+    if (produtoGravado) {
+      await exigirSupabase().from("produtos").delete().eq("id", dados.id);
+    }
+    throw paraErroApp(erro, "Não foi possível salvar o produto. Verifique sua conexão e tente novamente.");
+  }
 }

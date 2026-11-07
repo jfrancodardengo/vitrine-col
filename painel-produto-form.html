@@ -27,7 +27,11 @@
     <div class="cartao-formulario cartao-formulario-largo">
       <h1 id="titulo-pagina">Cadastrar produto</h1>
 
-      <form class="formulario" id="formulario-produto" novalidate>
+      <p class="aviso aviso-info" id="aviso-sem-loja" role="status" hidden>
+        Cadastre a sua loja antes de cadastrar produtos. <a href="painel-loja.html">Ir para Minha loja</a>
+      </p>
+
+      <form class="formulario" id="formulario-produto" novalidate hidden>
         <div class="campo">
           <label for="nome-produto">Nome</label>
           <input type="text" id="nome-produto" name="nome" required>
@@ -49,19 +53,7 @@
 
         <fieldset class="campo">
           <legend>Tamanhos e estoque</legend>
-          <div id="linhas-tamanhos">
-            <div class="linha-tamanho" role="group" aria-label="Tamanho e estoque, linha 1">
-              <div class="campo">
-                <label for="tamanho-1">Tamanho</label>
-                <input id="tamanho-1" type="text" list="sugestoes-tamanhos" required>
-              </div>
-              <div class="campo">
-                <label for="estoque-1">Estoque</label>
-                <input id="estoque-1" type="number" min="0" step="1" value="0" required>
-              </div>
-              <button type="button" class="botao botao-perigo botao-pequeno">Remover tamanho</button>
-            </div>
-          </div>
+          <div id="linhas-tamanhos"></div>
           <button type="button" class="botao botao-secundario botao-pequeno" id="adicionar-tamanho">Adicionar
             tamanho</button>
           <p class="campo-ajuda">Use estoque 0 para o tamanho que acabou: ele aparece sem estoque para as clientes.</p>

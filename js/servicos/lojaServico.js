@@ -1,6 +1,12 @@
 // Fala com o banco sobre lojas. Devolve dados ou lança ErroApp.
 import { exigirSupabase } from "../supabaseClient.js";
 import { ErroApp } from "../modelos/ErroApp.js";
+import { Loja } from "../modelos/Loja.js";
+import { paraErroApp } from "./errosSupabase.js";
+import { normalizarTelefone, telefoneValido } from "../ui/formatadores.js";
+import { LOJISTA_DE_TESTE_ID } from "../config.js";
+
+const CAMPOS_DA_LOJA = "id, nome, descricao, endereco, cidade, whatsapp, link_mapa";
 
 // Devolve [{ id, nome }], em ordem alfabética. Usada no filtro de lojas do catálogo.
 export async function listarLojas() {
@@ -20,5 +26,109 @@ export async function listarLojas() {
           "Não foi possível carregar as lojas. Verifique sua conexão e tente novamente.",
           erro
         );
+  }
+}
+
+// ---------- Painel da lojista ----------
+
+// Valida os dados do formulário da loja. Devolve { campo: "mensagem" } (vazio quando está tudo certo).
+// A tela mostra cada mensagem ao lado do campo; salvarLoja valida de novo antes de gravar.
+export function validarLoja({ nome, endereco, cidade, whatsapp, linkMapa }) {
+  const erros = {};
+
+  if (String(nome ?? "").trim() === "") {
+    erros.nome = "Informe o nome da loja.";
+  }
+  if (String(endereco ?? "").trim() === "") {
+    erros.endereco = "Informe o endereço da loja.";
+  }
+  if (String(cidade ?? "").trim() === "") {
+    erros.cidade = "Informe a cidade da loja.";
+  }
+
+  // RN-10: o WhatsApp é guardado só com dígitos e código do país. A lojista pode digitar com DDD e máscara.
+  if (!telefoneValido(normalizarTelefone(whatsapp))) {
+    erros.whatsapp = "WhatsApp inválido. Informe o DDD e o número, por exemplo 27 99999-9999.";
+  }
+
+  // O link do mapa é opcional; se existir, precisa ser http ou https
+  const textoDoLink = String(linkMapa ?? "").trim();
+  if (textoDoLink !== "") {
+    try {
+      const protocolo = new URL(textoDoLink).protocol;
+      if (protocolo !== "http:" && protocolo !== "https:") {
+        throw new Error("protocolo");
+      }
+    } catch (erro) {
+      erros.linkMapa = "O link do mapa deve começar com http:// ou https://.";
+    }
+  }
+
+  return erros;
+}
+
+// Texto vazio vira null no banco (colunas opcionais)
+function vazioParaNulo(texto) {
+  const limpo = String(texto ?? "").trim();
+  return limpo === "" ? null : limpo;
+}
+
+// Devolve a loja da lojista, ou null se ela ainda não cadastrou (RN-01: no máximo uma loja).
+// PROVISÓRIO: até o login existir (Dia 13), a lojista é sempre a lojista de teste.
+export async function obterMinhaLoja() {
+  try {
+    const supabase = exigirSupabase();
+    const { data, error } = await supabase.from("lojas").select(CAMPOS_DA_LOJA).eq("dono_id", LOJISTA_DE_TESTE_ID).maybeSingle();
+    if (error) {
+      throw error;
+    }
+    return data;
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível carregar a sua loja. Verifique sua conexão e tente novamente.");
+  }
+}
+
+// Cria a loja (sem "id") ou edita a loja existente (com "id"). Devolve a loja gravada.
+export async function salvarLoja({ id, nome, descricao, endereco, cidade, whatsapp, linkMapa }) {
+  try {
+    ErroApp.lancarSeHouverErros(validarLoja({ nome, endereco, cidade, whatsapp, linkMapa }));
+
+    const linha = {
+      nome: nome.trim(),
+      descricao: vazioParaNulo(descricao),
+      endereco: endereco.trim(),
+      cidade: cidade.trim(),
+      whatsapp: normalizarTelefone(whatsapp),
+      link_mapa: vazioParaNulo(linkMapa),
+    };
+
+    // Última defesa: o modelo Loja confere as regras de novo (RN-10) e lança ErroApp se algo escapou
+    new Loja({ id, nome: linha.nome, endereco: linha.endereco, cidade: linha.cidade, whatsapp: linha.whatsapp, linkMapa: linha.link_mapa ?? "" });
+
+    const supabase = exigirSupabase();
+
+    if (id) {
+      const { data, error } = await supabase.from("lojas").update(linha).eq("id", id).select(CAMPOS_DA_LOJA).maybeSingle();
+      if (error) {
+        throw error;
+      }
+      // As regras RLS só deixam a dona alterar; se não voltou nenhuma linha, a loja não é desta lojista
+      if (!data) {
+        throw new ErroApp("loja_nao_encontrada", "Não foi possível salvar: a loja não foi encontrada ou não é sua.");
+      }
+      return data;
+    }
+
+    const { data, error } = await supabase.from("lojas").insert({ dono_id: LOJISTA_DE_TESTE_ID, ...linha }).select(CAMPOS_DA_LOJA).single();
+    if (error) {
+      throw error;
+    }
+    return data;
+  } catch (erro) {
+    // 23505 = violação de unicidade: o banco só aceita uma loja por lojista (RN-01)
+    if (erro?.code === "23505") {
+      throw new ErroApp("loja_ja_existe", "Você já tem uma loja cadastrada. Recarregue a página para editá-la.", erro);
+    }
+    throw paraErroApp(erro, "Não foi possível salvar a loja. Verifique sua conexão e tente novamente.");
   }
 }
