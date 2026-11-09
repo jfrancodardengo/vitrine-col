@@ -1,13 +1,20 @@
-// Painel da lojista: cadastrar produto, com tamanhos.
+// Painel da lojista: cadastrar e editar produto, com tamanhos.
 // A página só valida, chama os serviços e mostra o resultado.
+// Para editar, o endereço traz o id: painel-produto-form.html?id=...
 import { montarCabecalho } from "../ui/cabecalho.js";
 import { mostrarCarregando, mostrarErro, limparAvisos, mensagemDoErro, mostrarErroDoCampo, limparErroDoCampo, limparErrosDosCampos } from "../ui/avisos.js";
 import { obterMinhaLoja } from "../servicos/lojaServico.js";
 import { listarCategorias } from "../servicos/categoriaServico.js";
-import { criarProduto, validarProduto } from "../servicos/produtoServico.js";
+import { obterProdutoParaEdicao, criarProduto, atualizarProduto, validarProduto } from "../servicos/produtoServico.js";
 
-// O id do produto nasce AQUI, no navegador, antes de qualquer envio: assim o mesmo id vale para o produto e, depois, para as fotos.
-const produtoId = crypto.randomUUID();
+const idNaUrl = new URLSearchParams(location.search).get("id");
+const editando = idNaUrl !== null;
+
+// O id do produto novo nasce AQUI, no navegador, antes de qualquer envio: assim o caminho das fotos no Storage
+// ({loja_id}/{produto_id}/...) já existe, e o mesmo id é usado ao gravar o produto no banco.
+const produtoId = editando ? idNaUrl : crypto.randomUUID();
+
+const titulo = document.getElementById("titulo-pagina");
 
 const avisoSemLoja = document.getElementById("aviso-sem-loja");
 const formulario = document.getElementById("formulario-produto");
@@ -189,9 +196,13 @@ formulario.addEventListener("submit", async (evento) => {
   mostrarCarregando("Salvando o produto…");
 
   try {
-    await criarProduto(dados);
+    if (editando) {
+      await atualizarProduto(produtoId, dados);
+    } else {
+      await criarProduto(dados);
+    }
     // A lista de produtos mostra a mensagem de sucesso
-    location.assign("painel-produtos.html?salvo=criado");
+    location.assign("painel-produtos.html?salvo=" + (editando ? "editado" : "criado"));
   } catch (erro) {
     limparAvisos();
     mostrarErro(mensagemDoErro(erro));
@@ -213,8 +224,26 @@ function preencherCategorias(categorias) {
   });
 }
 
+// Ao editar: coloca nos campos o que já está salvo
+function preencherFormulario(produto) {
+  campoNome.value = produto.nome;
+  campoDescricao.value = produto.descricao ?? "";
+  campoCategoria.value = String(produto.categoria_id);
+  campoPreco.value = produto.preco;
+  campoAtivo.checked = produto.ativo;
+
+  produto.tamanhos.forEach((item) => adicionarLinhaDeTamanho(item.tamanho, String(item.estoque)));
+  if (produto.tamanhos.length === 0) {
+    adicionarLinhaDeTamanho();
+  }
+}
+
 async function iniciar() {
   montarCabecalho();
+  if (editando) {
+    titulo.textContent = "Editar produto";
+  }
+
   mostrarCarregando();
   try {
     loja = await obterMinhaLoja();
@@ -226,7 +255,12 @@ async function iniciar() {
 
     preencherCategorias(await listarCategorias());
 
-    adicionarLinhaDeTamanho();
+    if (editando) {
+      // O serviço só devolve produtos DESTA loja; o de outra lojista vira "Produto não encontrado"
+      preencherFormulario(await obterProdutoParaEdicao(idNaUrl, loja.id));
+    } else {
+      adicionarLinhaDeTamanho();
+    }
 
     formulario.hidden = false;
     limparAvisos();

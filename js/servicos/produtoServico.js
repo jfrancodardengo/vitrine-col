@@ -105,6 +105,7 @@ export async function listarPaginaDeProdutos({ pagina = 0, porPagina = 12, ...fi
 // =====================================================================
 
 // "p", " p " e "P" são o mesmo tamanho
+const MENSAGEM_PRODUTO_JA_PEDIDO = "Este produto já foi pedido; desative-o em vez de excluir.";
 function normalizarTamanho(tamanho) {
   return String(tamanho ?? "").trim().toUpperCase();
 }
@@ -159,6 +160,51 @@ export function validarProduto({ nome, categoriaId, preco, tamanhos = [] }) {
   });
 
   return erros;
+}
+
+// Lista TODOS os produtos da loja, inclusive os inativos (a dona vê os dois pelas regras RLS).
+export async function listarProdutosDaLoja(lojaId) {
+  try {
+    const supabase = exigirSupabase();
+    const { data, error } = await supabase
+      .from("produtos")
+      .select("id, nome, preco, ativo, categorias ( nome )")
+      .eq("loja_id", lojaId)
+      .order("nome");
+
+    if (error) {
+      throw error;
+    }
+    return data;
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível carregar os seus produtos. Verifique sua conexão e tente novamente.");
+  }
+}
+
+// Traz um produto da loja (ativo ou não) com todos os tamanhos e as fotos em ordem, para o formulário de edição.
+// O filtro por loja_id impede abrir, por engano, o produto de outra loja.
+export async function obterProdutoParaEdicao(id, lojaId) {
+  try {
+    const supabase = exigirSupabase();
+    const { data, error } = await supabase
+      .from("produtos")
+      .select(CAMPOS_DO_PRODUTO + ", tamanhos ( tamanho, estoque ), produto_fotos ( id, url, caminho, ordem )")
+      .eq("id", id)
+      .eq("loja_id", lojaId)
+      .order("ordem", { referencedTable: "produto_fotos", ascending: true })
+      .maybeSingle();
+
+    // 22P02 = "isso não é um uuid": um endereço como ?id=abc também é "não encontrado"
+    if (error && error.code !== "22P02") {
+      throw error;
+    }
+    if (error || !data) {
+      throw new ErroApp("produto_nao_encontrado", "Produto não encontrado.");
+    }
+    return data;
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível carregar o produto. Verifique sua conexão e tente novamente.");
+  }
 }
 
 // Monta a linha da tabela produtos e as linhas de tamanhos a partir dos dados do formulário.
@@ -225,5 +271,110 @@ export async function criarProduto(dados) {
       await exigirSupabase().from("produtos").delete().eq("id", dados.id);
     }
     throw paraErroApp(erro, "Não foi possível salvar o produto. Verifique sua conexão e tente novamente.");
+  }
+}
+
+// Atualiza o produto e os tamanhos (RF-17). Os dados têm o mesmo formato do criarProduto. As fotos entram na Aula 33.
+export async function atualizarProduto(id, dados) {
+  try {
+    ErroApp.lancarSeHouverErros(validarProduto(dados));
+    conferirComOModelo({ ...dados, id });
+    const supabase = exigirSupabase();
+    const { linhaDoProduto, linhasDeTamanhos } = montarLinhas(dados);
+
+    // Como está hoje no banco: serve para saber o que foi removido
+    const { data: atual, error: erroAoLer } = await supabase
+      .from("produtos")
+      .select("id, tamanhos ( tamanho )")
+      .eq("id", id)
+      .eq("loja_id", dados.lojaId)
+      .maybeSingle();
+    if (erroAoLer) {
+      throw erroAoLer;
+    }
+    if (!atual) {
+      throw new ErroApp("produto_nao_encontrado", "Produto não encontrado.");
+    }
+
+    // 1) Dados do produto. Se a loja não for desta lojista, as regras RLS não alteram nada e não volta linha
+    const { data: alterados, error: erroDoProduto } = await supabase.from("produtos").update(linhaDoProduto).eq("id", id).select("id");
+    if (erroDoProduto) {
+      throw erroDoProduto;
+    }
+    if (alterados.length === 0) {
+      throw new ErroApp("permissao_negada", "Você não tem permissão para alterar este produto.");
+    }
+
+    // 2) Tamanhos: grava os atuais (cria ou atualiza) e apaga os que a lojista tirou
+    const { error: erroDosTamanhos } = await supabase
+      .from("tamanhos")
+      .upsert(linhasDeTamanhos.map((linha) => ({ produto_id: id, ...linha })), { onConflict: "produto_id,tamanho" });
+    if (erroDosTamanhos) {
+      throw erroDosTamanhos;
+    }
+    const tamanhosNovos = new Set(linhasDeTamanhos.map((linha) => linha.tamanho));
+    const tamanhosRemovidos = atual.tamanhos.map((t) => t.tamanho).filter((t) => !tamanhosNovos.has(t));
+    if (tamanhosRemovidos.length > 0) {
+      const { error } = await supabase.from("tamanhos").delete().eq("produto_id", id).in("tamanho", tamanhosRemovidos);
+      if (error) {
+        throw error;
+      }
+    }
+
+    return id;
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível salvar o produto. Verifique sua conexão e tente novamente.");
+  }
+}
+
+// Ativa ou desativa o produto (RF-18). Produto inativo some do catálogo e da página da loja (RN-08).
+export async function definirAtivo(id, ativo) {
+  try {
+    const supabase = exigirSupabase();
+    const { data, error } = await supabase.from("produtos").update({ ativo }).eq("id", id).select("id");
+
+    if (error) {
+      throw error;
+    }
+    if (data.length === 0) {
+      throw new ErroApp("permissao_negada", "Você não tem permissão para alterar este produto.");
+    }
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível alterar o produto. Verifique sua conexão e tente novamente.");
+  }
+}
+
+// Exclui o produto (RF-18). Produto que já foi pedido NÃO pode ser excluído: o banco impede, e a mensagem sugere desativar.
+// Ordem dos passos: 1) confere se já foi pedido; 2) apaga o produto (o banco apaga em cascata os tamanhos e as fotos).
+// As fotos guardadas no Storage passam a ser apagadas junto na Aula 33.
+export async function excluirProduto(id) {
+  try {
+    const supabase = exigirSupabase();
+
+    // As regras RLS deixam a lojista ver os itens dos pedidos da própria loja, e é neles que o produto aparece
+    const { count, error: erroDosPedidos } = await supabase
+      .from("itens_pedido")
+      .select("id", { count: "exact", head: true })
+      .eq("produto_id", id);
+    if (erroDosPedidos) {
+      throw erroDosPedidos;
+    }
+    if (count > 0) {
+      throw new ErroApp("produto_ja_pedido", MENSAGEM_PRODUTO_JA_PEDIDO);
+    }
+
+    const { data: apagados, error: erroAoApagar } = await supabase.from("produtos").delete().eq("id", id).select("id");
+    if (erroAoApagar) {
+      // 23503: alguém fez um pedido deste produto entre a conferência e agora
+      if (erroAoApagar.code === "23503") {
+        throw new ErroApp("produto_ja_pedido", MENSAGEM_PRODUTO_JA_PEDIDO, erroAoApagar);
+      }
+      throw erroAoApagar;
+    }
+    if (apagados.length === 0) {
+      throw new ErroApp("permissao_negada", "Você não tem permissão para excluir este produto.");
+    }
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível excluir o produto. Verifique sua conexão e tente novamente.");
   }
 }

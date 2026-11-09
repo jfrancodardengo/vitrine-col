@@ -13,20 +13,7 @@
 
 <body>
   <a class="link-pular" href="#conteudo">Ir para o conteúdo</a>
-  <header class="cabecalho" id="cabecalho">
-    <div class="container cabecalho-conteudo">
-      <a class="logotipo" href="index.html">VitrineCol</a>
-      <nav aria-label="Principal">
-        <ul class="menu">
-          <li><a href="index.html">Início</a></li>
-          <li><a href="catalogo.html">Catálogo</a></li>
-          <li><a href="sacola.html">Sacola</a></li>
-          <li><a href="login.html">Entrar</a></li>
-          <li><a href="cadastro.html">Cadastrar</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
+  <header class="cabecalho" id="cabecalho"></header>
 
   <main id="conteudo" class="container">
     <nav aria-label="Painel da lojista">
@@ -39,11 +26,18 @@
 
     <h1>Meus produtos</h1>
 
-    <p class="painel-acoes" id="acoes-produtos">
+    <p class="aviso aviso-info" id="aviso-sem-loja" role="status" hidden>
+      Cadastre a sua loja antes de cadastrar produtos. <a href="painel-loja.html">Ir para Minha loja</a>
+    </p>
+
+    <p class="painel-acoes" id="acoes-produtos" hidden>
       <a class="botao" href="painel-produto-form.html">Cadastrar produto</a>
     </p>
 
-    <table class="tabela" id="tabela-produtos" role="table">
+    <p class="aviso aviso-info" id="mensagem-sem-produtos" role="status" hidden>Você ainda não cadastrou nenhum produto.
+    </p>
+
+    <table class="tabela" id="tabela-produtos" role="table" hidden>
       <caption class="visualmente-oculto">Lista dos produtos da loja</caption>
       <thead role="rowgroup">
         <tr role="row">
@@ -54,40 +48,7 @@
           <th scope="col" role="columnheader">Ações</th>
         </tr>
       </thead>
-      <tbody id="lista-produtos-painel" role="rowgroup">
-        <tr role="row">
-          <td data-rotulo="Produto" role="cell">Vestido midi floral</td>
-          <td data-rotulo="Categoria" role="cell">Vestidos</td>
-          <td data-rotulo="Preço" role="cell">R$ 129,90</td>
-          <td data-rotulo="Situação" role="cell"><span class="selo selo-confirmado">Ativo</span></td>
-          <td data-rotulo="Ações" role="cell">
-            <div class="tabela-acoes">
-              <a class="botao botao-secundario botao-pequeno" href="painel-produto-form.html">Editar<span
-                  class="visualmente-oculto"> (Vestido midi floral)</span></a>
-              <button type="button" class="botao botao-pequeno botao-secundario">Desativar<span
-                  class="visualmente-oculto"> (Vestido midi floral)</span></button>
-              <button type="button" class="botao botao-pequeno botao-perigo">Excluir<span class="visualmente-oculto">
-                  (Vestido midi floral)</span></button>
-            </div>
-          </td>
-        </tr>
-        <tr role="row">
-          <td data-rotulo="Produto" role="cell">Camiseta básica branca</td>
-          <td data-rotulo="Categoria" role="cell">Camisetas</td>
-          <td data-rotulo="Preço" role="cell">R$ 49,90</td>
-          <td data-rotulo="Situação" role="cell"><span class="selo selo-concluido">Inativo</span></td>
-          <td data-rotulo="Ações" role="cell">
-            <div class="tabela-acoes">
-              <a class="botao botao-secundario botao-pequeno" href="painel-produto-form.html">Editar<span
-                  class="visualmente-oculto"> (Camiseta básica branca)</span></a>
-              <button type="button" class="botao botao-pequeno botao-secundario">Ativar<span class="visualmente-oculto">
-                  (Camiseta básica branca)</span></button>
-              <button type="button" class="botao botao-pequeno botao-perigo">Excluir<span class="visualmente-oculto">
-                  (Camiseta básica branca)</span></button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
+      <tbody id="lista-produtos-painel" role="rowgroup"></tbody>
     </table>
   </main>
 
@@ -101,6 +62,8 @@
       <p>Projeto integrador – Jovem Programadora (Senac). Pagamento e entrega são combinados direto com a loja.</p>
     </div>
   </footer>
+
+  <script type="module" src="js/paginas/painelProdutos.js"></script>
 </body>
 
 </html>
