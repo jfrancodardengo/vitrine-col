@@ -1,9 +1,10 @@
-// Página pública do produto (produto.html?id=...): galeria, preço, loja, tamanhos e quantidade (RF-08, RN-02, RN-08).
-// O botão "Adicionar à sacola" ainda não grava nada: a sacola chega na Aula 35.
-import { montarCabecalho } from "../ui/cabecalho.js";
+// Página pública do produto (produto.html?id=...): galeria, preço, loja, tamanhos e "Adicionar à sacola" (RF-08, RF-09, RN-03).
+// A sacola aceita peças de qualquer loja: nada é perguntado ao adicionar uma peça de outra loja.
+import { montarCabecalho, atualizarContadorSacola } from "../ui/cabecalho.js";
 import { mostrarCarregando, mostrarErro, mostrarInfo, limparAvisos, mensagemDoErro, mostrarErroDoCampo, limparErrosDosCampos } from "../ui/avisos.js";
 import { ErroApp } from "../modelos/ErroApp.js";
 import { Produto } from "../modelos/Produto.js";
+import { Sacola } from "../modelos/Sacola.js";
 import { obterProduto } from "../servicos/produtoServico.js";
 
 const titulo = document.getElementById("titulo-produto");
@@ -158,8 +159,17 @@ formulario.addEventListener("submit", (evento) => {
     return;
   }
 
-  // A sacola chega na próxima aula; por enquanto só confirmamos o que foi escolhido
-  mostrarInfo("Você escolheu o tamanho " + escolhido.value + ", quantidade " + quantidade + ". A sacola chega na próxima aula.");
+  try {
+    // A sacola vem do navegador, recebe a peça (de qualquer loja, RN-03) e é guardada de novo
+    const sacola = Sacola.carregar();
+    sacola.adicionar(produto, escolhido.value, quantidade);
+    sacola.salvar();
+
+    atualizarContadorSacola();
+    atalhoSacola.hidden = false;
+  } catch (erro) {
+    mostrarErro(mensagemDoErro(erro));
+  }
 });
 
 async function iniciar() {

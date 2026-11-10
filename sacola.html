@@ -13,74 +13,38 @@
 
 <body>
   <a class="link-pular" href="#conteudo">Ir para o conteúdo</a>
-  <header class="cabecalho" id="cabecalho">
-    <div class="container cabecalho-conteudo">
-      <a class="logotipo" href="index.html">VitrineCol</a>
-      <nav aria-label="Principal">
-        <ul class="menu">
-          <li><a href="index.html">Início</a></li>
-          <li><a href="catalogo.html">Catálogo</a></li>
-          <li><a href="sacola.html" aria-current="page">Sacola</a></li>
-          <li><a href="login.html">Entrar</a></li>
-          <li><a href="cadastro.html">Cadastrar</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
+  <header class="cabecalho" id="cabecalho"></header>
 
   <main id="conteudo" class="container">
     <div class="sacola-layout">
       <h1 id="titulo-sacola" tabindex="-1">Sacola</h1>
+      <p class="visualmente-oculto" id="anuncio-sacola" role="status" aria-live="polite"></p>
 
       <!-- A sacola em si: itens por loja, total e o botão de finalizar -->
       <section id="sacola-conteudo" aria-label="Itens da sacola">
         <p class="texto-suave" id="explicacao-sacola">Cada loja recebe um pedido separado. O combinado de pagamento e
           entrega é feito pelo WhatsApp da loja.</p>
-        <div id="grupos-sacola">
-          <section class="sacola-loja" aria-labelledby="loja-1">
-            <h2 id="loja-1"><a href="loja.html">Loja Exemplo</a></h2>
-            <ul class="sacola-itens">
-              <li class="sacola-item">
-                <img src="imagens/exemplo-1.svg" alt="Foto de Vestido midi floral" width="600" height="750">
-                <div>
-                  <p class="sacola-item-nome">Vestido midi floral – tamanho M</p>
-                  <p>R$ 129,90 cada</p>
-                  <div class="sacola-item-controles">
-                    <label for="quantidade-1">Quantidade</label>
-                    <input id="quantidade-1" type="number" min="1" step="1" value="1">
-                    <button type="button" class="botao botao-perigo botao-pequeno">Remover</button>
-                  </div>
-                </div>
-              </li>
-            </ul>
-            <p class="sacola-subtotal">Subtotal da loja: R$ 129,90</p>
-          </section>
-          <section class="sacola-loja" aria-labelledby="loja-2">
-            <h2 id="loja-2"><a href="loja.html">Loja do Bairro</a></h2>
-            <ul class="sacola-itens">
-              <li class="sacola-item">
-                <img src="imagens/exemplo-3.svg" alt="Foto de Calça jeans reta" width="600" height="750">
-                <div>
-                  <p class="sacola-item-nome">Calça jeans reta – tamanho 40</p>
-                  <p>R$ 159,90 cada</p>
-                  <div class="sacola-item-controles">
-                    <label for="quantidade-2">Quantidade</label>
-                    <input id="quantidade-2" type="number" min="1" step="1" value="1">
-                    <button type="button" class="botao botao-perigo botao-pequeno">Remover</button>
-                  </div>
-                </div>
-              </li>
-            </ul>
-            <p class="sacola-subtotal">Subtotal da loja: R$ 159,90</p>
-          </section>
-        </div>
+        <div id="grupos-sacola"></div>
 
-        <div id="rodape-sacola">
-          <p class="sacola-total" id="total-sacola">Total: R$ 289,80</p>
-          <button type="button" class="botao botao-largo" id="botao-finalizar">Finalizar sacola (2 pedidos)</button>
+        <p class="aviso aviso-info" id="sacola-vazia" role="status" hidden>Sua sacola está vazia. <a
+            href="catalogo.html">Ver o catálogo</a></p>
+
+        <div id="rodape-sacola" hidden>
+          <p class="sacola-total" id="total-sacola"></p>
+          <button type="button" class="botao botao-largo" id="botao-finalizar">Finalizar sacola</button>
         </div>
       </section>
 
+      <!-- Depois de finalizar, esta seção aparece no lugar da sacola -->
+      <section id="confirmacao" aria-label="Pedidos enviados" hidden>
+        <p class="aviso aviso-sucesso" role="status">Pedidos gravados! Agora envie o resumo de cada um pelo WhatsApp da
+          loja, para combinar pagamento e entrega.</p>
+        <div id="cartoes-pedidos"></div>
+        <p class="acoes-formulario">
+          <a class="botao botao-secundario" href="meus-pedidos.html">Acompanhar em Meus pedidos</a>
+          <a class="botao botao-secundario" href="catalogo.html">Voltar ao catálogo</a>
+        </p>
+      </section>
     </div>
   </main>
 
@@ -94,6 +58,8 @@
       <p>Projeto integrador – Jovem Programadora (Senac). Pagamento e entrega são combinados direto com a loja.</p>
     </div>
   </footer>
+
+  <script type="module" src="js/paginas/sacola.js"></script>
 </body>
 
 </html>

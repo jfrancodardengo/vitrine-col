@@ -531,6 +531,20 @@ fieldset.campo legend {
   }
 }
 
+/* ---------- Contador de itens da sacola (no cabeçalho) ---------- */
+.contador-sacola {
+  display: inline-block;
+  min-width: 1.5rem;
+  margin-left: var(--espaco-1);
+  padding: 0 var(--espaco-2);
+  font-size: var(--tamanho-pequeno);
+  line-height: 1.5rem;
+  text-align: center;
+  color: var(--cor-texto-sobre-primaria);
+  background-color: var(--cor-primaria);
+  border-radius: var(--raio-pilula);
+}
+
 /* ---------- Erro ao lado de um campo de formulário ---------- */
 .campo-erro {
   margin: 0;
