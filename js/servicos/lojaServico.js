@@ -29,6 +29,27 @@ export async function listarLojas() {
   }
 }
 
+// ---------- Páginas públicas ----------
+
+// Traz uma loja pelo id, para a página da loja (RF-06). Id que não existe (ou que nem é um uuid) vira "Loja não encontrada".
+export async function obterLoja(id) {
+  try {
+    const supabase = exigirSupabase();
+    const { data, error } = await supabase.from("lojas").select(CAMPOS_DA_LOJA).eq("id", id).maybeSingle();
+
+    // 22P02 = "isso não é um uuid": um endereço como loja.html?id=abc também é "não encontrada"
+    if (error && error.code !== "22P02") {
+      throw error;
+    }
+    if (error || !data) {
+      throw new ErroApp("loja_nao_encontrada", "Loja não encontrada.");
+    }
+    return data;
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível carregar a loja. Verifique sua conexão e tente novamente.");
+  }
+}
+
 // ---------- Painel da lojista ----------
 
 // Valida os dados do formulário da loja. Devolve { campo: "mensagem" } (vazio quando está tudo certo).

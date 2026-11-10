@@ -23,3 +23,14 @@ export function normalizarTelefone(texto) {
 export function telefoneValido(digitos) {
   return /^\d{12,13}$/.test(String(digitos ?? ""));
 }
+
+// Monta o link do WhatsApp (RN-10): https://wa.me/<número>?text=<mensagem codificada>.
+// O número deve ter só dígitos, com código do país e DDD (12 ou 13 dígitos); senão devolve null (loja sem WhatsApp válido).
+// encodeURIComponent transforma espaços, acentos e quebras de linha em %XX, para a mensagem caber no endereço.
+export function criarLinkDoWhatsapp(numero, mensagem) {
+  const digitos = String(numero ?? "");
+  if (!telefoneValido(digitos)) {
+    return null;
+  }
+  return "https://wa.me/" + digitos + "?text=" + encodeURIComponent(mensagem);
+}

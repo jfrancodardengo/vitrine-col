@@ -99,6 +99,40 @@ export async function listarPaginaDeProdutos({ pagina = 0, porPagina = 12, ...fi
   }
 }
 
+// Página do produto (RF-08): um produto ativo, com TODOS os tamanhos e TODAS as fotos, em ordem.
+// Se não existir, ou estiver inativo, lança ErroApp "produto_nao_encontrado".
+export async function obterProduto(id) {
+  try {
+    const supabase = exigirSupabase();
+
+    const { data, error } = await supabase
+      .from("produtos")
+      .select(CAMPOS_DO_PRODUTO + ", tamanhos ( tamanho, estoque ), " + CAMPOS_DAS_FOTOS)
+      .eq("id", id)
+      .eq("ativo", true)
+      .order("ordem", { referencedTable: "produto_fotos", ascending: true })
+      // maybeSingle: devolve um objeto, ou null se não achar (em vez de dar erro)
+      .maybeSingle();
+
+    // 22P02 = "isso não é um uuid": um endereço como produto.html?id=abc também é "não encontrado"
+    if (error && error.code !== "22P02") {
+      throw error;
+    }
+    if (error || !data) {
+      throw new ErroApp("produto_nao_encontrado", "Produto não encontrado.");
+    }
+    return data;
+  } catch (erro) {
+    throw erro instanceof ErroApp
+      ? erro
+      : new ErroApp(
+          "erro_ao_obter_produto",
+          "Não foi possível carregar o produto. Verifique sua conexão e tente novamente.",
+          erro
+        );
+  }
+}
+
 // =====================================================================
 // Painel da lojista (RF-16 a RF-19): cadastrar, editar, ativar/desativar e excluir produtos.
 // A lojista só consegue mexer nos produtos da própria loja: quem garante isso são as regras RLS (RN-09);
