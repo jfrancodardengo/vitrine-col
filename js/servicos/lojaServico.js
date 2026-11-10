@@ -50,6 +50,21 @@ export async function obterLoja(id) {
   }
 }
 
+// Nome e WhatsApp das lojas indicadas, para montar os links do WhatsApp na confirmação do pedido (RF-10).
+export async function listarContatosDasLojas(ids) {
+  try {
+    const supabase = exigirSupabase();
+    const { data, error } = await supabase.from("lojas").select("id, nome, whatsapp").in("id", ids);
+
+    if (error) {
+      throw error;
+    }
+    return data;
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível carregar o contato das lojas. Verifique sua conexão e tente novamente.");
+  }
+}
+
 // ---------- Painel da lojista ----------
 
 // Valida os dados do formulário da loja. Devolve { campo: "mensagem" } (vazio quando está tudo certo).

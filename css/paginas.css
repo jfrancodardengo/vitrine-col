@@ -189,6 +189,56 @@
   margin-bottom: 0;
 }
 
+/* ---------- Meus pedidos e pedidos recebidos ---------- */
+.compra {
+  margin-bottom: var(--espaco-5);
+  padding: var(--espaco-4);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+}
+
+.compra-cabecalho {
+  margin-bottom: var(--espaco-3);
+  color: var(--cor-texto-suave);
+}
+
+.pedido-loja {
+  margin-top: var(--espaco-3);
+  padding: var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+}
+
+.pedido-loja-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-2);
+}
+
+.pedido-loja-topo h3 {
+  margin: 0;
+}
+
+.pedido-itens {
+  margin: 0 0 var(--espaco-2) var(--espaco-5);
+}
+
+.recado-loja {
+  margin: var(--espaco-2) 0 0;
+  padding: var(--espaco-2) var(--espaco-3);
+  background-color: var(--cor-primaria-clara);
+  border-radius: var(--raio-pequeno);
+}
+
+.pedido-novidade {
+  border-color: var(--cor-primaria);
+  border-width: 2px;
+}
+
 /* ---------- Painel da lojista ---------- */
 .navegacao-painel {
   display: flex;
@@ -341,6 +391,16 @@
     grid-template-columns: 1fr 1fr auto;
     align-items: end;
   }
+}
+
+/* ---------- Sacola: confirmação do pedido ---------- */
+#confirmacao .acoes-formulario {
+  margin-top: var(--espaco-4);
+}
+
+/* O título da confirmação recebe o foco por script (para o leitor de tela começar nele); não é um controle, então sem contorno */
+h1[tabindex="-1"]:focus {
+  outline: none;
 }
 
 /* ---------- Botão "Carregar mais" do catálogo ---------- */

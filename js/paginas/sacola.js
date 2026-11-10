@@ -1,18 +1,26 @@
-// Página da sacola: itens por loja, quantidades e total (RF-09, RN-02, RN-03).
-// A sacola fica no navegador (localStorage). A finalização do pedido entra na Aula 36.
+// Página da sacola: itens por loja, quantidades, total e "Finalizar" (RF-09, RF-10, RN-03, RN-10).
+// A sacola fica no navegador (localStorage). Nesta etapa (Aula 36) a finalização monta os pedidos e os botões de WhatsApp,
+// mas ainda não grava nada no banco e não exige login: isso entra no Dia 13.
 import { montarCabecalho, atualizarContadorSacola } from "../ui/cabecalho.js";
-import { mostrarErro, mostrarInfo, limparAvisos, mensagemDoErro } from "../ui/avisos.js";
-import { formatarPreco } from "../ui/formatadores.js";
+import { mostrarCarregando, mostrarErro, mostrarInfo, limparAvisos, mensagemDoErro } from "../ui/avisos.js";
+import { formatarPreco, criarLinkDoWhatsapp } from "../ui/formatadores.js";
+import { ErroApp } from "../modelos/ErroApp.js";
 import { Sacola } from "../modelos/Sacola.js";
+import { criarPedidos } from "../servicos/pedidoServico.js";
+import { listarContatosDasLojas } from "../servicos/lojaServico.js";
 import { criarElemento } from "../ui/elementos.js";
 
+const titulo = document.getElementById("titulo-sacola");
 const anuncio = document.getElementById("anuncio-sacola");
+const blocoDaSacola = document.getElementById("sacola-conteudo");
 const explicacao = document.getElementById("explicacao-sacola");
 const blocoDosGrupos = document.getElementById("grupos-sacola");
 const mensagemVazia = document.getElementById("sacola-vazia");
 const rodape = document.getElementById("rodape-sacola");
 const textoDoTotal = document.getElementById("total-sacola");
 const botaoFinalizar = document.getElementById("botao-finalizar");
+const blocoDaConfirmacao = document.getElementById("confirmacao");
+const blocoDosCartoes = document.getElementById("cartoes-pedidos");
 
 let sacola = Sacola.carregar();
 let enviando = false;
@@ -159,8 +167,117 @@ function desenhar() {
   atualizarTotais();
 }
 
-// A finalização do pedido entra na Aula 36
-botaoFinalizar.addEventListener("click", () => mostrarInfo("Finalizar a sacola chega na próxima aula."));
+// ---------- Finalizar ----------
+
+// Um cartão por loja, com o código do pedido, os itens, o total e o botão do WhatsApp (RF-10, RN-10)
+function criarCartaoDoPedido(pedido, whatsapp) {
+  const cartao = criarElemento("article", "pedido-loja");
+  cartao.setAttribute("aria-label", "Pedido para " + pedido.lojaNome);
+
+  const topo = criarElemento("div", "pedido-loja-topo");
+  topo.append(criarElemento("h2", "", pedido.lojaNome), criarElemento("span", "selo selo-novo", pedido.rotuloParaCliente()));
+
+  const codigo = criarElemento("p", "", "Pedido ");
+  codigo.append(criarElemento("strong", "", "#" + pedido.codigoCurto()));
+
+  const itens = criarElemento("ul", "pedido-itens");
+  pedido.itens.forEach((item) => {
+    itens.append(
+      criarElemento("li", "", item.quantidade + "x " + item.nome + " (tamanho " + item.tamanho + ") – " + formatarPreco(item.precoUnitario) + " cada")
+    );
+  });
+
+  cartao.append(topo, codigo, itens, criarElemento("p", "", "Total do pedido: " + formatarPreco(pedido.total)));
+
+  // É um <a> comum (clique da própria usuária), e não um window.open: assim o navegador não bloqueia como pop-up
+  const href = criarLinkDoWhatsapp(whatsapp, pedido.mensagemParaWhatsapp());
+  if (href) {
+    const botao = criarElemento("a", "botao botao-whatsapp", "Enviar pedido para " + pedido.lojaNome + " no WhatsApp");
+    botao.href = href;
+    botao.target = "_blank";
+    botao.rel = "noopener";
+    botao.append(criarElemento("span", "visualmente-oculto", " (abre em nova aba)"));
+    cartao.append(botao);
+  } else {
+    cartao.append(
+      criarElemento("p", "aviso aviso-info", "Esta loja ainda não cadastrou o WhatsApp. O pedido ficou gravado e a loja o verá no painel.")
+    );
+  }
+
+  return cartao;
+}
+
+// Troca a sacola pela confirmação. Os pedidos JÁ estão gravados; se faltar o WhatsApp de alguma loja, só avisamos.
+async function mostrarConfirmacao(pedidos) {
+  const contatos = new Map();
+  let faltouContato = false;
+
+  try {
+    const idsDasLojas = [...new Set(pedidos.map((pedido) => pedido.lojaId))];
+    (await listarContatosDasLojas(idsDasLojas)).forEach((loja) => contatos.set(loja.id, loja.whatsapp));
+  } catch (erro) {
+    console.warn(erro.codigo, erro.cause ?? "");
+    faltouContato = true;
+  }
+
+  blocoDosCartoes.replaceChildren(...pedidos.map((pedido) => criarCartaoDoPedido(pedido, contatos.get(pedido.lojaId))));
+
+  titulo.textContent = "Pedidos enviados";
+  document.title = "Pedidos enviados – VitrineCol";
+  blocoDaSacola.hidden = true;
+  blocoDaConfirmacao.hidden = false;
+  limparAvisos();
+  if (faltouContato) {
+    mostrarInfo("Os pedidos foram gravados, mas não foi possível carregar o WhatsApp das lojas. Acompanhe tudo em Meus pedidos.");
+  }
+  titulo.focus(); // leva o foco (e o leitor de tela) para o título da confirmação
+}
+
+// Libera o botão de novo (quando a finalização não aconteceu ou falhou)
+function liberarBotao() {
+  enviando = false;
+  botaoFinalizar.disabled = false;
+  atualizarTotais();
+}
+
+async function finalizar() {
+  // A trava liga JÁ no primeiro clique, antes de qualquer espera: cliques seguidos não podem criar o pedido várias vezes.
+  if (enviando) {
+    return;
+  }
+  enviando = true;
+  botaoFinalizar.disabled = true;
+  limparAvisos();
+
+  botaoFinalizar.textContent = "Enviando pedidos…";
+  mostrarCarregando("Montando os pedidos…");
+
+  let pedidos;
+  try {
+    pedidos = await criarPedidos(sacola);
+  } catch (erro) {
+    // Falhou: a sacola NÃO é limpa, para a cliente poder tentar de novo sem perder nada
+    limparAvisos();
+    mostrarErro(mensagemDoErro(erro));
+    if (erro instanceof ErroApp && erro.codigo === "preco_mudou") {
+      desenhar(); // o serviço atualizou os preços da sacola
+    }
+    liberarBotao();
+    return;
+  }
+
+  // Gravou: agora sim esvazia a sacola
+  sacola.limpar();
+  try {
+    sacola.salvar();
+  } catch (erro) {
+    console.warn(erro.codigo, erro.cause ?? "");
+  }
+  atualizarContadorSacola();
+  await mostrarConfirmacao(pedidos);
+}
+
+botaoFinalizar.addEventListener("click", finalizar);
 
 montarCabecalho();
 desenhar();
