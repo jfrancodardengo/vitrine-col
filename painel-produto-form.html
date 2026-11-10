@@ -73,6 +73,32 @@
             Produto ativo (aparece no catálogo)</label>
         </div>
 
+        <section aria-labelledby="titulo-fotos">
+          <h2 id="titulo-fotos">Fotos do produto</h2>
+
+          <div class="campo">
+            <label for="arquivos-fotos">Escolher fotos</label>
+            <input type="file" id="arquivos-fotos" name="fotos" multiple accept="image/jpeg,image/png,image/webp"
+              aria-describedby="ajuda-fotos">
+            <p class="campo-ajuda" id="ajuda-fotos">Até 5 fotos, em JPG, PNG ou WebP, com até 2 MB cada. A primeira da
+              lista é a capa do catálogo.</p>
+          </div>
+
+          <ul class="fotos-gerenciar" id="lista-fotos"></ul>
+          <p class="visualmente-oculto" id="anuncio-fotos" role="status" aria-live="polite"></p>
+
+          <!-- Só aparece se o envio de uma foto falhar -->
+          <div class="campo" id="bloco-endereco-foto" hidden>
+            <label for="endereco-foto">Endereço (URL) de uma imagem</label>
+            <input type="url" id="endereco-foto" placeholder="https://exemplo.com/foto.jpg"
+              aria-describedby="ajuda-endereco-foto">
+            <p class="campo-ajuda" id="ajuda-endereco-foto">Se não for possível enviar o arquivo, você pode usar o
+              endereço de uma imagem que já esteja na internet.</p>
+            <button type="button" class="botao botao-secundario botao-pequeno" id="usar-endereco-foto">Usar este
+              endereço</button>
+          </div>
+        </section>
+
         <div class="acoes-formulario">
           <button type="submit" class="botao">Salvar produto</button>
           <a class="botao botao-secundario" href="painel-produtos.html">Cancelar</a>

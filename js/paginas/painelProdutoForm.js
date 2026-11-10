@@ -1,8 +1,10 @@
-// Painel da lojista: cadastrar e editar produto, com tamanhos.
+// Painel da lojista: cadastrar e editar produto, com tamanhos e fotos.
 // A página só valida, chama os serviços e mostra o resultado.
 // Para editar, o endereço traz o id: painel-produto-form.html?id=...
 import { montarCabecalho } from "../ui/cabecalho.js";
 import { mostrarCarregando, mostrarErro, limparAvisos, mensagemDoErro, mostrarErroDoCampo, limparErroDoCampo, limparErrosDosCampos } from "../ui/avisos.js";
+import { criarListaDeFotos } from "../ui/listaDeFotos.js";
+import { ErroApp } from "../modelos/ErroApp.js";
 import { obterMinhaLoja } from "../servicos/lojaServico.js";
 import { listarCategorias } from "../servicos/categoriaServico.js";
 import { obterProdutoParaEdicao, criarProduto, atualizarProduto, validarProduto } from "../servicos/produtoServico.js";
@@ -28,10 +30,20 @@ const campoPreco = document.getElementById("preco-produto");
 const campoAtivo = document.getElementById("ativo-produto");
 const blocoDeLinhas = document.getElementById("linhas-tamanhos");
 const botaoAdicionarTamanho = document.getElementById("adicionar-tamanho");
+const campoArquivos = document.getElementById("arquivos-fotos");
+const blocoEnderecoDaFoto = document.getElementById("bloco-endereco-foto");
+const campoEnderecoDaFoto = document.getElementById("endereco-foto");
+const botaoUsarEndereco = document.getElementById("usar-endereco-foto");
 
 let loja = null;
 let enviando = false;
 let contadorDeLinhas = 0; // só serve para dar um id único a cada campo criado
+
+const fotos = criarListaDeFotos({
+  elementoLista: document.getElementById("lista-fotos"),
+  elementoAnuncio: document.getElementById("anuncio-fotos"),
+  elementoFocoSeVazia: campoArquivos,
+});
 
 // ---------- Linhas de tamanho (a lojista adiciona e remove) ----------
 
@@ -125,7 +137,7 @@ function lerDados() {
     preco: campoPreco.value,
     ativo: campoAtivo.checked,
     tamanhos: lerTamanhos(),
-    fotos: [],
+    fotos: fotos.obterParaSalvar(),
   };
 }
 
@@ -136,6 +148,7 @@ function acharCampoDoErro(chave) {
     categoriaId: campoCategoria,
     preco: campoPreco,
     tamanhos: botaoAdicionarTamanho,
+    fotos: campoArquivos,
   };
   if (campos[chave]) {
     return campos[chave];
@@ -166,6 +179,31 @@ function mostrarErrosDoFormulario(erros) {
   comErro[0]?.focus();
 }
 
+// ---------- Fotos ----------
+
+campoArquivos.addEventListener("change", () => {
+  limparErroDoCampo(campoArquivos);
+
+  // Os arquivos recusados (formato, tamanho ou o limite de 5) não tiram as fotos que já estavam na lista
+  const problemas = fotos.adicionarArquivos(campoArquivos.files);
+  campoArquivos.value = ""; // assim a lojista pode escolher o mesmo arquivo de novo
+  if (problemas.length > 0) {
+    mostrarErroDoCampo(campoArquivos, problemas.join(" "));
+  }
+});
+
+botaoUsarEndereco.addEventListener("click", () => {
+  limparErroDoCampo(campoEnderecoDaFoto);
+
+  const problema = fotos.adicionarEndereco(campoEnderecoDaFoto.value);
+  if (problema) {
+    mostrarErroDoCampo(campoEnderecoDaFoto, problema);
+    campoEnderecoDaFoto.focus();
+  } else {
+    campoEnderecoDaFoto.value = "";
+  }
+});
+
 botaoAdicionarTamanho.addEventListener("click", () => {
   limparErroDoCampo(botaoAdicionarTamanho);
   adicionarLinhaDeTamanho().focus();
@@ -193,7 +231,7 @@ formulario.addEventListener("submit", async (evento) => {
   enviando = true;
   botaoSalvar.disabled = true;
   botaoSalvar.textContent = "Salvando…";
-  mostrarCarregando("Salvando o produto…");
+  mostrarCarregando("Salvando o produto e enviando as fotos…");
 
   try {
     if (editando) {
@@ -207,6 +245,10 @@ formulario.addEventListener("submit", async (evento) => {
     limparAvisos();
     mostrarErro(mensagemDoErro(erro));
 
+    // Se o envio de uma foto falhou, a lojista pode usar o endereço (URL) de uma imagem no lugar (a coluna "caminho" fica vazia)
+    if (erro instanceof ErroApp && erro.codigo === "erro_ao_enviar_foto") {
+      blocoEnderecoDaFoto.hidden = false;
+    }
     enviando = false;
     botaoSalvar.disabled = false;
     botaoSalvar.textContent = textoOriginalDoBotao;
@@ -236,6 +278,9 @@ function preencherFormulario(produto) {
   if (produto.tamanhos.length === 0) {
     adicionarLinhaDeTamanho();
   }
+
+  // As fotos salvas aparecem na ordem da coluna "ordem": a primeira é a capa
+  fotos.carregarSalvas([...produto.produto_fotos].sort((a, b) => a.ordem - b.ordem));
 }
 
 async function iniciar() {

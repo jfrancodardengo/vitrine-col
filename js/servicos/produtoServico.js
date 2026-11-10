@@ -2,8 +2,9 @@
 // Transformar as linhas em objetos Produto é trabalho da página (veja catalogo.js).
 import { exigirSupabase } from "../supabaseClient.js";
 import { ErroApp } from "../modelos/ErroApp.js";
-import { Produto } from "../modelos/Produto.js";
+import { Produto, MAXIMO_DE_FOTOS } from "../modelos/Produto.js";
 import { paraErroApp } from "./errosSupabase.js";
+import { enviarFoto, tentarRemoverFotos } from "./storageServico.js";
 
 // Colunas do produto e das tabelas relacionadas. Em "categorias ( id, nome )" o Supabase junta,
 // em uma só consulta, a categoria do produto (é só uma, então vem como objeto).
@@ -116,9 +117,9 @@ function converterPreco(preco) {
 }
 
 // Valida o formulário do produto. Devolve { campo: "mensagem" } (vazio quando está tudo certo).
-// Chaves: nome, categoriaId, preco, tamanhos e, para cada linha de tamanho, "tamanho-0", "estoque-0", "tamanho-1"...
+// Chaves: nome, categoriaId, preco, tamanhos, fotos e, para cada linha de tamanho, "tamanho-0", "estoque-0", "tamanho-1"...
 // A tela mostra cada mensagem ao lado do campo; criarProduto e atualizarProduto validam de novo antes de gravar.
-export function validarProduto({ nome, categoriaId, preco, tamanhos = [] }) {
+export function validarProduto({ nome, categoriaId, preco, tamanhos = [], fotos = [] }) {
   const erros = {};
 
   if (String(nome ?? "").trim() === "") {
@@ -158,6 +159,11 @@ export function validarProduto({ nome, categoriaId, preco, tamanhos = [] }) {
       erros["estoque-" + indice] = "O estoque deve ser um número inteiro, zero ou maior.";
     }
   });
+
+  // RN-12: no máximo 5 fotos por produto
+  if (fotos.length > MAXIMO_DE_FOTOS) {
+    erros.fotos = "Cada produto pode ter no máximo " + MAXIMO_DE_FOTOS + " fotos.";
+  }
 
   return erros;
 }
@@ -238,10 +244,32 @@ function conferirComOModelo(dados) {
   });
 }
 
-// Cria o produto e os tamanhos (RF-16). As fotos entram na Aula 33.
-// "dados.id" é gerado no navegador (crypto.randomUUID()) ANTES do envio.
-// Passos: 1) grava o produto; 2) grava os tamanhos. Se algo falhar, desfaz o que foi feito.
+// Envia os arquivos novos ao Storage e devolve a lista final de fotos, na mesma ordem.
+// Cada item de "fotos" é de um destes tipos:
+//   { id, url, caminho }  foto que já estava salva
+//   { url }               endereço de imagem informado à mão (caminho fica vazio)
+//   { arquivo }           arquivo novo, que ainda precisa ser enviado
+// "enviados" recebe os caminhos dos arquivos enviados agora, para desfazer se algo falhar depois.
+async function enviarFotosNovas(fotos, lojaId, produtoId, enviados) {
+  const resultado = [];
+
+  for (const foto of fotos) {
+    if (foto.arquivo) {
+      const salva = await enviarFoto(foto.arquivo, lojaId, produtoId);
+      enviados.push(salva.caminho);
+      resultado.push({ url: salva.url, caminho: salva.caminho });
+    } else {
+      resultado.push({ id: foto.id, url: foto.url, caminho: foto.caminho ?? null });
+    }
+  }
+  return resultado;
+}
+
+// Cria o produto, os tamanhos e as fotos (RF-16, RF-19).
+// "dados.id" é gerado no navegador (crypto.randomUUID()) ANTES do envio, para o caminho das fotos no Storage já usar o id do produto.
+// Passos: 1) envia os arquivos; 2) grava o produto; 3) grava tamanhos e fotos. Se algo falhar, desfaz o que foi feito.
 export async function criarProduto(dados) {
+  const enviados = [];
   let produtoGravado = false;
 
   try {
@@ -249,6 +277,8 @@ export async function criarProduto(dados) {
     conferirComOModelo(dados);
     const supabase = exigirSupabase();
     const { linhaDoProduto, linhasDeTamanhos } = montarLinhas(dados);
+
+    const fotos = await enviarFotosNovas(dados.fotos, dados.lojaId, dados.id, enviados);
 
     const { error: erroDoProduto } = await supabase.from("produtos").insert({ id: dados.id, ...linhaDoProduto });
     if (erroDoProduto) {
@@ -263,19 +293,33 @@ export async function criarProduto(dados) {
       throw erroDosTamanhos;
     }
 
+    if (fotos.length > 0) {
+      const { error: erroDasFotos } = await supabase
+        .from("produto_fotos")
+        .insert(fotos.map((foto, indice) => ({ produto_id: dados.id, url: foto.url, caminho: foto.caminho, ordem: indice + 1 })));
+      if (erroDasFotos) {
+        throw erroDasFotos;
+      }
+    }
+
     return dados.id;
   } catch (erro) {
-    // Desfaz: sem os tamanhos, é melhor não deixar o produto pela metade
-    // (apagar o produto também apaga, em cascata, os tamanhos ligados a ele)
+    // Desfaz: sem o produto completo, é melhor não deixar produto pela metade nem arquivos soltos.
+    // (Apagar o produto também apaga, em cascata, os tamanhos e as fotos dele.)
     if (produtoGravado) {
       await exigirSupabase().from("produtos").delete().eq("id", dados.id);
     }
+    await tentarRemoverFotos(enviados);
     throw paraErroApp(erro, "Não foi possível salvar o produto. Verifique sua conexão e tente novamente.");
   }
 }
 
-// Atualiza o produto e os tamanhos (RF-17). Os dados têm o mesmo formato do criarProduto. As fotos entram na Aula 33.
+// Atualiza o produto, os tamanhos e as fotos (RF-17, RF-19). Os dados têm o mesmo formato do criarProduto.
+// As fotos podem ter sido removidas, reordenadas ou acrescentadas: a ordem da lista vira a coluna "ordem" (1 a 5).
 export async function atualizarProduto(id, dados) {
+  const enviados = [];
+  let fotosNovasGravadas = false;
+
   try {
     ErroApp.lancarSeHouverErros(validarProduto(dados));
     conferirComOModelo({ ...dados, id });
@@ -285,7 +329,7 @@ export async function atualizarProduto(id, dados) {
     // Como está hoje no banco: serve para saber o que foi removido
     const { data: atual, error: erroAoLer } = await supabase
       .from("produtos")
-      .select("id, tamanhos ( tamanho )")
+      .select("id, tamanhos ( tamanho ), produto_fotos ( id, caminho )")
       .eq("id", id)
       .eq("loja_id", dados.lojaId)
       .maybeSingle();
@@ -295,6 +339,8 @@ export async function atualizarProduto(id, dados) {
     if (!atual) {
       throw new ErroApp("produto_nao_encontrado", "Produto não encontrado.");
     }
+
+    const fotos = await enviarFotosNovas(dados.fotos, dados.lojaId, id, enviados);
 
     // 1) Dados do produto. Se a loja não for desta lojista, as regras RLS não alteram nada e não volta linha
     const { data: alterados, error: erroDoProduto } = await supabase.from("produtos").update(linhaDoProduto).eq("id", id).select("id");
@@ -321,8 +367,47 @@ export async function atualizarProduto(id, dados) {
       }
     }
 
+    // 3) Fotos. Primeiro apaga as removidas (assim o limite de 5 do banco não atrapalha as novas)
+    const idsMantidos = new Set(fotos.filter((foto) => foto.id).map((foto) => foto.id));
+    const fotosRemovidas = atual.produto_fotos.filter((foto) => !idsMantidos.has(foto.id));
+    if (fotosRemovidas.length > 0) {
+      const { error } = await supabase.from("produto_fotos").delete().in("id", fotosRemovidas.map((foto) => foto.id));
+      if (error) {
+        throw error;
+      }
+    }
+
+    // Depois grava as novas, já com a ordem final
+    const fotosParaCriar = fotos
+      .map((foto, indice) => ({ foto, ordem: indice + 1 }))
+      .filter((item) => !item.foto.id)
+      .map((item) => ({ produto_id: id, url: item.foto.url, caminho: item.foto.caminho, ordem: item.ordem }));
+    if (fotosParaCriar.length > 0) {
+      const { error } = await supabase.from("produto_fotos").insert(fotosParaCriar);
+      if (error) {
+        throw error;
+      }
+    }
+    fotosNovasGravadas = true;
+
+    // Por fim, a ordem das fotos que já existiam (é isto que muda a capa quando a lojista reordena)
+    for (const [indice, foto] of fotos.entries()) {
+      if (foto.id) {
+        const { error } = await supabase.from("produto_fotos").update({ ordem: indice + 1 }).eq("id", foto.id);
+        if (error) {
+          throw error;
+        }
+      }
+    }
+
+    // Só agora apaga do Storage os arquivos das fotos removidas (melhor esforço: não trava se falhar)
+    await tentarRemoverFotos(fotosRemovidas.map((foto) => foto.caminho).filter(Boolean));
     return id;
   } catch (erro) {
+    // Se falhou antes de gravar as fotos novas, os arquivos enviados agora ficariam soltos: apaga
+    if (!fotosNovasGravadas) {
+      await tentarRemoverFotos(enviados);
+    }
     throw paraErroApp(erro, "Não foi possível salvar o produto. Verifique sua conexão e tente novamente.");
   }
 }
@@ -345,8 +430,9 @@ export async function definirAtivo(id, ativo) {
 }
 
 // Exclui o produto (RF-18). Produto que já foi pedido NÃO pode ser excluído: o banco impede, e a mensagem sugere desativar.
-// Ordem dos passos: 1) confere se já foi pedido; 2) apaga o produto (o banco apaga em cascata os tamanhos e as fotos).
-// As fotos guardadas no Storage passam a ser apagadas junto na Aula 33.
+// Ordem dos passos: 1) confere se já foi pedido; 2) guarda os caminhos das fotos; 3) apaga o produto (o banco apaga
+// em cascata os tamanhos e as linhas de produto_fotos); 4) apaga os arquivos do Storage, em "melhor esforço".
+// Deixamos os arquivos por último de propósito: se o banco recusar a exclusão, nenhuma foto foi perdida.
 export async function excluirProduto(id) {
   try {
     const supabase = exigirSupabase();
@@ -363,6 +449,11 @@ export async function excluirProduto(id) {
       throw new ErroApp("produto_ja_pedido", MENSAGEM_PRODUTO_JA_PEDIDO);
     }
 
+    const { data: fotos, error: erroDasFotos } = await supabase.from("produto_fotos").select("caminho").eq("produto_id", id);
+    if (erroDasFotos) {
+      throw erroDasFotos;
+    }
+
     const { data: apagados, error: erroAoApagar } = await supabase.from("produtos").delete().eq("id", id).select("id");
     if (erroAoApagar) {
       // 23503: alguém fez um pedido deste produto entre a conferência e agora
@@ -374,6 +465,8 @@ export async function excluirProduto(id) {
     if (apagados.length === 0) {
       throw new ErroApp("permissao_negada", "Você não tem permissão para excluir este produto.");
     }
+
+    await tentarRemoverFotos(fotos.map((foto) => foto.caminho).filter(Boolean));
   } catch (erro) {
     throw paraErroApp(erro, "Não foi possível excluir o produto. Verifique sua conexão e tente novamente.");
   }
