@@ -99,6 +99,27 @@ export async function listarPaginaDeProdutos({ pagina = 0, porPagina = 12, ...fi
   }
 }
 
+// RF-23 (página inicial): os produtos mais recentes que dá para comprar agora, ou seja, ativos, com pelo menos
+// uma foto e pelo menos um tamanho com estoque. "!inner" nas duas relações descarta quem não tem nenhuma das duas coisas.
+export async function listarProdutosEmDestaque(limite = 8) {
+  try {
+    const { data, error } = await exigirSupabase()
+      .from("produtos")
+      .select(CAMPOS_DO_PRODUTO + ", tamanhos!inner ( tamanho, estoque ), produto_fotos!inner ( id, url, ordem )")
+      .eq("ativo", true)
+      .gt("tamanhos.estoque", 0)
+      .order("criado_em", { ascending: false })
+      .order("ordem", { referencedTable: "produto_fotos", ascending: true })
+      .limit(limite);
+    if (error) {
+      throw error;
+    }
+    return data;
+  } catch (erro) {
+    throw erroAoListarProdutos(erro);
+  }
+}
+
 // Página do produto (RF-08): um produto ativo, com TODOS os tamanhos e TODAS as fotos, em ordem.
 // Se não existir, ou estiver inativo, lança ErroApp "produto_nao_encontrado".
 export async function obterProduto(id) {

@@ -1,0 +1,437 @@
+/* Página inicial (index.html): hero, carrossel, categorias, destaques, lojas, passos e chamada para lojistas.
+   Mobile-first: o que está fora das media queries vale para o celular; 768px e 1024px acrescentam colunas. */
+
+/* A página inicial não usa o espaçamento padrão do <main>: cada seção cuida do seu próprio espaço */
+.inicio {
+  padding-block: 0;
+}
+
+.secao {
+  padding-block: var(--espaco-6);
+}
+
+.secao-destaque {
+  background-color: var(--cor-primaria-clara);
+}
+
+.secao-acao {
+  margin: var(--espaco-5) 0 0;
+  text-align: center;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  padding-block: var(--espaco-7);
+  color: var(--cor-texto-sobre-primaria);
+  background-image: linear-gradient(135deg, var(--cor-primaria-escura), var(--cor-primaria));
+  background-color: var(--cor-primaria-escura);
+}
+
+/* O contêiner continua alinhado com o resto da página; só o texto do hero fica numa coluna mais estreita */
+.hero-conteudo > * {
+  max-width: 44rem;
+}
+
+.hero-sobretitulo {
+  margin-bottom: var(--espaco-2);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: var(--tamanho-pequeno);
+}
+
+.hero h1 {
+  font-size: 2rem;
+  line-height: 1.15;
+}
+
+.hero-texto {
+  margin-bottom: var(--espaco-5);
+  font-size: var(--tamanho-medio);
+}
+
+.hero-busca {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-4);
+}
+
+.hero-busca input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--espaco-2) var(--espaco-3);
+  font: inherit;
+  color: var(--cor-texto);
+  background-color: var(--cor-superficie);
+  border: 2px solid var(--cor-superficie);
+  border-radius: var(--raio-medio);
+}
+
+.hero-busca input:focus-visible,
+.hero .botao:focus-visible {
+  outline: 3px solid var(--cor-superficie);
+  outline-offset: 2px;
+}
+
+/* O botão "Buscar" fica branco sobre o fundo escuro do hero, como os outros botões dele */
+.hero-busca .botao,
+.hero .botao-claro {
+  color: var(--cor-primaria-escura);
+  background-color: var(--cor-superficie);
+  border-color: var(--cor-superficie);
+}
+
+.hero-busca .botao:hover,
+.hero .botao-claro:hover {
+  color: var(--cor-primaria-escura);
+  background-color: var(--cor-primaria-clara);
+  border-color: var(--cor-primaria-clara);
+}
+
+.hero .botao-contorno {
+  color: var(--cor-texto-sobre-primaria);
+  background-color: transparent;
+  border-color: var(--cor-texto-sobre-primaria);
+}
+
+.hero .botao-contorno:hover {
+  color: var(--cor-primaria-escura);
+  background-color: var(--cor-superficie);
+  border-color: var(--cor-superficie);
+}
+
+.hero-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+  margin: 0;
+}
+
+/* ---------- Carrossel ---------- */
+.carrossel {
+  overflow: hidden;
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+  box-shadow: var(--sombra-media);
+}
+
+.carrossel-slide {
+  display: grid;
+  grid-template-columns: 1fr;
+  animation: carrossel-aparecer 0.4s ease;
+}
+
+@keyframes carrossel-aparecer {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.slide-imagem {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background-color: var(--cor-neutro-fundo);
+}
+
+.slide-texto {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--espaco-2);
+  padding: var(--espaco-5);
+}
+
+.slide-etiqueta {
+  margin: 0;
+  font-size: var(--tamanho-pequeno);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cor-texto-suave);
+}
+
+.slide-titulo {
+  margin: 0;
+  font-size: var(--tamanho-grande);
+}
+
+.slide-titulo a {
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+.slide-titulo a:hover {
+  text-decoration: underline;
+}
+
+.slide-loja {
+  margin: 0 0 var(--espaco-2);
+  color: var(--cor-texto-suave);
+}
+
+.carrossel-controles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3);
+  border-top: 1px solid var(--cor-borda);
+}
+
+.carrossel-seta,
+.carrossel-pausa {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  font: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--cor-primaria-escura);
+  background-color: var(--cor-superficie);
+  border: 2px solid var(--cor-primaria);
+  border-radius: var(--raio-pilula);
+  cursor: pointer;
+}
+
+.carrossel-seta:hover,
+.carrossel-pausa:hover {
+  background-color: var(--cor-primaria-clara);
+}
+
+.carrossel-pontos {
+  display: flex;
+  gap: var(--espaco-1);
+  list-style: none;
+}
+
+/* O botão tem 1,5rem (alvo de toque confortável); a bolinha visível é menor e fica no centro */
+.carrossel-ponto {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.carrossel-ponto::before {
+  content: "";
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid var(--cor-primaria);
+  border-radius: 50%;
+  background-color: var(--cor-superficie);
+}
+
+.carrossel-ponto[aria-current="true"]::before {
+  background-color: var(--cor-primaria);
+}
+
+/* ---------- Tipos de roupa ---------- */
+.categorias-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+  list-style: none;
+}
+
+.categoria-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: var(--espaco-2) var(--espaco-4);
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--cor-primaria-escura);
+  background-color: var(--cor-superficie);
+  border: 2px solid var(--cor-primaria);
+  border-radius: var(--raio-pilula);
+}
+
+.categoria-link:hover {
+  color: var(--cor-primaria-escura);
+  background-color: var(--cor-primaria-clara);
+}
+
+.categoria-link-todas {
+  color: var(--cor-texto-sobre-primaria);
+  background-color: var(--cor-primaria);
+}
+
+.categoria-link-todas:hover {
+  color: var(--cor-texto-sobre-primaria);
+  background-color: var(--cor-primaria-escura);
+}
+
+/* ---------- Lojas parceiras ---------- */
+.grade-lojas {
+  display: grid;
+  gap: var(--espaco-4);
+  grid-template-columns: 1fr;
+  list-style: none;
+}
+
+.cartao-loja {
+  position: relative;
+  height: 100%;
+  padding: var(--espaco-4);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+  box-shadow: var(--sombra-leve);
+}
+
+.cartao-loja-titulo {
+  margin: 0 0 var(--espaco-1);
+}
+
+.cartao-loja-titulo a {
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+/* O link do nome cobre o cartão inteiro, assim ele todo é clicável (como nos cards de produto) */
+.cartao-loja-titulo a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.cartao-loja-titulo a:hover {
+  text-decoration: underline;
+}
+
+.cartao-loja:focus-within {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.cartao-loja-titulo a:focus-visible {
+  outline: none;
+}
+
+.cartao-loja-cidade {
+  margin: 0 0 var(--espaco-2);
+  font-size: var(--tamanho-pequeno);
+  color: var(--cor-texto-suave);
+}
+
+/* Descrições longas são cortadas em 3 linhas para os cartões ficarem do mesmo tamanho */
+.cartao-loja-descricao {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* ---------- Como funciona ---------- */
+.passos {
+  display: grid;
+  gap: var(--espaco-4);
+  grid-template-columns: 1fr;
+  list-style: none;
+  counter-reset: passo;
+}
+
+.passos li {
+  position: relative;
+  padding: var(--espaco-4) var(--espaco-4) var(--espaco-4) 4rem;
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+  counter-increment: passo;
+}
+
+/* O número do passo é desenhado pelo CSS; a lista numerada (ol) já informa a ordem ao leitor de tela */
+.passos li::before {
+  content: counter(passo);
+  position: absolute;
+  top: var(--espaco-4);
+  left: var(--espaco-4);
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  font-weight: 700;
+  color: var(--cor-texto-sobre-primaria);
+  background-color: var(--cor-primaria);
+  border-radius: 50%;
+}
+
+.passos h3 {
+  margin-bottom: var(--espaco-1);
+}
+
+.passos p {
+  margin: 0;
+}
+
+/* ---------- Chamada para lojistas ---------- */
+.chamada-lojista {
+  padding: var(--espaco-6) var(--espaco-4);
+  text-align: center;
+  background-color: var(--cor-superficie);
+  border: 2px solid var(--cor-primaria);
+  border-radius: var(--raio-medio);
+}
+
+.chamada-lojista p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- Tablet ---------- */
+@media (min-width: 768px) {
+  .hero h1 {
+    font-size: 2.75rem;
+  }
+
+  .hero-busca {
+    flex-direction: row;
+  }
+
+  .hero-busca input {
+    flex: 1;
+  }
+
+  .carrossel-slide {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .slide-imagem {
+    height: 100%;
+    min-height: 20rem;
+    max-height: 26rem;
+    aspect-ratio: auto;
+  }
+
+  .slide-titulo {
+    font-size: var(--tamanho-titulo);
+  }
+
+  .grade-lojas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .passos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ---------- Desktop ---------- */
+@media (min-width: 1024px) {
+  .grade-lojas {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

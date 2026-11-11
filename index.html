@@ -4,85 +4,128 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>VitrineCol</title>
-
-  <link rel="stylesheet" href="css/variaveis.css" />
-  <link rel="stylesheet" href="css/base.css" />
-  <link rel="stylesheet" href="css/componentes.css" />
+  <title>VitrineCol – Moda das lojas do seu bairro</title>
+  <meta name="description"
+    content="Escolha roupas de várias lojas locais, junte tudo na mesma sacola e combine cada pedido direto com a loja pelo WhatsApp.">
+  <link rel="stylesheet" href="css/variaveis.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
   <link rel="stylesheet" href="css/paginas.css">
+  <link rel="stylesheet" href="css/inicio.css">
 </head>
 
 <body>
-  <a class="link-pular" href="#conteudo"> Ir para o conteúdo </a>
-  <header class="cabecalho" id="cabecalho">
-    <div class="container cabecalho-conteudo">
-      <a class="logotipo" href="index.html">VitrineCol</a>
-      <nav aria-label="Principal">
-        <ul class="menu">
-          <li>
-            <a href="index.html" aria-current="page">Início</a>
-          </li>
-          <li>
-            <a href="catalogo.html">Catálogo</a>
-          </li>
-          <li>
-            <a href="sacola.html">Sacola</a>
-          </li>
-          <li>
-            <a href="login.html">Entrar</a>
-          </li>
-          <li>
-            <a href="cadastro.html">Cadastrar</a>
-          </li>
-        </ul>
-      </nav>
-    </div>
-  </header>
+  <a class="link-pular" href="#conteudo">Ir para o conteúdo</a>
+  <header class="cabecalho" id="cabecalho"></header>
 
-  <main id="conteudo" class="container">
-    <h1>VitrineCol</h1>
-    <p>Roupas das lojas do seu bairro, num só lugar.</p>
+  <main id="conteudo" class="inicio">
+    <!-- Seção hero: a primeira coisa que a pessoa vê -->
+    <section class="hero" aria-labelledby="titulo-hero">
+      <div class="container hero-conteudo">
+        <p class="hero-sobretitulo">Moda local, perto de você</p>
+        <h1 id="titulo-hero">Roupas das lojas do seu bairro, num só lugar</h1>
+        <p class="hero-texto">
+          Escolha peças de várias lojas, junte tudo na mesma sacola e combine cada pedido direto com a loja pelo
+          WhatsApp.
+        </p>
 
-    <section aria-labelledby="titulo-como">
-      <h2 id="titulo-como">Como funciona</h2>
-      <p>Escolha peças de várias lojas, junte tudo na mesma sacola e combine cada pedido direto com a loja pelo
-        WhatsApp.</p>
-      <img src="imagens/sem-foto.svg" alt="Ilustração de uma foto de produto que ainda não existe" width="300"
-        height="375">
+        <form class="hero-busca" action="catalogo.html" method="get" role="search" aria-label="Buscar roupas">
+          <label for="busca-inicio" class="visualmente-oculto">Buscar roupas pelo nome</label>
+          <input type="search" id="busca-inicio" name="busca" placeholder="Buscar roupas, por exemplo: vestido">
+          <button type="submit" class="botao">Buscar</button>
+        </form>
+
+        <p class="hero-acoes">
+          <a class="botao botao-claro" href="catalogo.html">Ver o catálogo</a>
+          <a class="botao botao-contorno" href="#lojas">Conhecer as lojas</a>
+        </p>
+      </div>
     </section>
 
-    <section aria-labelledby="titulo-lojista">
-      <h2 id="titulo-lojista">Tem uma loja de roupas?</h2>
-      <p>Cadastre a sua loja e os seus produtos, com até 5 fotos cada, e receba os pedidos das clientes do bairro.</p>
-      <p>
-        <a href="cadastro.html">Quero vender na VitrineCol</a>
-      </p>
+    <!-- Os avisos de carregando e de erro aparecem aqui, logo abaixo do hero -->
+    <div class="container area-avisos"></div>
+
+    <!-- Carrossel com as peças mais recentes; é preenchido pelo JavaScript e fica escondido se não houver peças -->
+    <section class="secao" id="secao-carrossel" aria-labelledby="titulo-carrossel" hidden>
+      <div class="container">
+        <h2 id="titulo-carrossel" class="visualmente-oculto">Novidades nas lojas</h2>
+        <div id="carrossel"></div>
+      </div>
+    </section>
+
+    <section class="secao" aria-labelledby="titulo-categorias">
+      <div class="container">
+        <h2 id="titulo-categorias">Compre por tipo de roupa</h2>
+        <ul class="categorias-lista" id="lista-categorias"></ul>
+      </div>
+    </section>
+
+    <section class="secao secao-destaque" aria-labelledby="titulo-destaques">
+      <div class="container">
+        <h2 id="titulo-destaques">Produtos em destaque</h2>
+        <ul class="grade-produtos" id="lista-destaques"></ul>
+        <p class="aviso aviso-info" id="mensagem-sem-destaques" role="status" hidden>
+          Ainda não há peças em destaque. Volte em breve!
+        </p>
+        <p class="secao-acao"><a class="botao botao-secundario" href="catalogo.html">Ver todos os produtos</a></p>
+      </div>
+    </section>
+
+    <section class="secao" id="lojas" aria-labelledby="titulo-lojas">
+      <div class="container">
+        <h2 id="titulo-lojas">Lojas parceiras</h2>
+        <ul class="grade-lojas" id="lista-lojas"></ul>
+        <p class="aviso aviso-info" id="mensagem-sem-lojas" role="status" hidden>
+          Ainda não há lojas cadastradas.
+        </p>
+      </div>
+    </section>
+
+    <section class="secao secao-destaque" aria-labelledby="titulo-como-funciona">
+      <div class="container">
+        <h2 id="titulo-como-funciona">Como funciona</h2>
+        <ol class="passos">
+          <li>
+            <h3>Escolha</h3>
+            <p>Veja as peças de várias lojas e filtre por tipo de roupa, tamanho e loja.</p>
+          </li>
+          <li>
+            <h3>Junte na sacola</h3>
+            <p>Coloque peças de lojas diferentes na mesma sacola. Cada loja recebe o seu próprio pedido.</p>
+          </li>
+          <li>
+            <h3>Combine pelo WhatsApp</h3>
+            <p>Envie o pedido à loja, combine pagamento e entrega e acompanhe o status em Meus pedidos.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="secao" aria-labelledby="titulo-lojistas">
+      <div class="container">
+        <div class="chamada-lojista">
+          <h2 id="titulo-lojistas">Tem uma loja de roupas?</h2>
+          <p>Cadastre a sua loja e os seus produtos, com até 5 fotos cada, e receba os pedidos das clientes do bairro.
+          </p>
+          <p><a class="botao" href="cadastro.html">Quero vender na VitrineCol</a></p>
+        </div>
+      </div>
     </section>
   </main>
 
   <footer class="rodape">
     <div class="container">
       <ul class="rodape-links">
-        <li>
-          <a href="catalogo.html">Catálogo</a>
-        </li>
-
-        <li>
-          <a href="privacidade.html">Aviso de privacidade</a>
-        </li>
-
-        <li>
-          <a href="meus-pedidos.html">Meus pedidos</a>
-        </li>
-
-        <li>
-          <a href="painel-loja.html">Painel da loja</a>
-        </li>
+        <li><a href="catalogo.html">Catálogo</a></li>
+        <li><a href="privacidade.html">Aviso de privacidade</a></li>
+        <li><a href="meus-pedidos.html">Meus pedidos</a></li>
+        <li><a href="painel-loja.html">Painel da loja</a></li>
       </ul>
-
       <p>Projeto integrador – Jovem Programadora (Senac). Pagamento e entrega são combinados direto com a loja.</p>
     </div>
   </footer>
+
+  <script type="module" src="js/paginas/inicio.js"></script>
 </body>
 
 </html>

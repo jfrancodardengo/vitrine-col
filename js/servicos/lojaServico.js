@@ -30,6 +30,25 @@ export async function listarLojas() {
   }
 }
 
+// Devolve [{ id, nome, descricao, cidade }], em ordem alfabética. Usada nos cartões da página inicial (RF-23).
+export async function listarLojasParaVitrine() {
+  try {
+    const { data, error } = await exigirSupabase().from("lojas").select("id, nome, descricao, cidade").order("nome");
+    if (error) {
+      throw error;
+    }
+    return data;
+  } catch (erro) {
+    throw erro instanceof ErroApp
+      ? erro
+      : new ErroApp(
+          "erro_ao_listar_lojas",
+          "Não foi possível carregar as lojas. Verifique sua conexão e tente novamente.",
+          erro
+        );
+  }
+}
+
 // ---------- Páginas públicas ----------
 
 // Traz uma loja pelo id, para a página da loja (RF-06). Id que não existe (ou que nem é um uuid) vira "Loja não encontrada".
