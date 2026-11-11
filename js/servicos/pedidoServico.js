@@ -1,9 +1,11 @@
-// Cria os pedidos da cliente (RF-10, RN-03, RN-06). Devolve dados ou lança ErroApp.
+// Grava os pedidos da cliente (RF-10, RN-03, RN-04, RN-06). Devolve dados ou lança ErroApp.
 import { exigirSupabase } from "../supabaseClient.js";
 import { ErroApp } from "../modelos/ErroApp.js";
+import { Cliente } from "../modelos/Cliente.js";
 import { Sacola } from "../modelos/Sacola.js";
 import { Pedido } from "../modelos/Pedido.js";
 import { paraErroApp } from "./errosSupabase.js";
+import { usuariaAtual } from "./authServico.js";
 import { formatarPreco } from "../ui/formatadores.js";
 
 // Antes de gravar, confere no banco se cada produto continua à venda e se o preço é o mesmo da sacola.
@@ -43,12 +45,22 @@ async function conferirProdutosDaSacola(supabase, sacola) {
   }
 }
 
-// Monta um pedido por loja a partir da sacola e devolve a lista de objetos Pedido (cada um com o seu id).
+// Cria um pedido por loja a partir da sacola e devolve a lista de objetos Pedido criados (cada um com o seu id).
 //
-// PROVISÓRIO (Dia 12): por enquanto os pedidos só são montados na memória, para a tela mostrar os botões de WhatsApp.
-// Quem GRAVA os pedidos no banco é a função criar_pedidos(), que entra no Dia 13, junto com o login (só uma cliente logada faz pedido).
+// Só uma cliente logada faz pedido (RN-04). O status inicial é "novo", e todos os pedidos da mesma finalização
+// têm o mesmo grupo_id (RN-03). Os ids dos pedidos nascem no navegador (crypto.randomUUID(), dentro de
+// Pedido.criarPorLoja) e tudo é gravado por UMA chamada à função criar_pedidos() do banco (database/04_melhorias.sql),
+// que roda numa transação: ou grava todos os pedidos e itens, ou não grava nada.
+// O banco também recalcula o total, confere o preço e o estoque e não aceita pedido gravado direto nas tabelas.
 export async function criarPedidos(sacola) {
   try {
+    const usuaria = await usuariaAtual();
+    if (!usuaria) {
+      throw new ErroApp("exige_login", "Entre na sua conta para finalizar o pedido.");
+    }
+    if (!(usuaria instanceof Cliente)) {
+      throw new ErroApp("exige_cliente", "Só contas de cliente fazem pedidos. Entre com uma conta de cliente.");
+    }
     if (!(sacola instanceof Sacola) || sacola.estaVazia()) {
       throw new ErroApp("sacola_vazia", "A sacola está vazia.");
     }
@@ -56,8 +68,30 @@ export async function criarPedidos(sacola) {
     const supabase = exigirSupabase();
     await conferirProdutosDaSacola(supabase, sacola);
 
-    // Um Pedido por loja, todos com o mesmo grupoId (RN-03)
-    return Pedido.criarPorLoja(sacola);
+    // Um Pedido por loja, todos com o mesmo grupoId
+    const pedidos = Pedido.criarPorLoja(sacola);
+
+    // O total não vai no envio: quem soma é o banco
+    const dadosDosPedidos = pedidos.map((pedido) => ({
+      id: pedido.id,
+      loja_id: pedido.lojaId,
+      itens: pedido.itens.map((item) => ({
+        produto_id: item.produtoId,
+        tamanho: item.tamanho,
+        quantidade: item.quantidade,
+        preco_unitario: item.precoUnitario,
+      })),
+    }));
+
+    const { error } = await supabase.rpc("criar_pedidos", {
+      p_grupo_id: pedidos[0].grupoId,
+      p_pedidos: dadosDosPedidos,
+    });
+    if (error) {
+      throw error;
+    }
+
+    return pedidos;
   } catch (erro) {
     throw paraErroApp(erro, "Não foi possível enviar o pedido. Verifique sua conexão e tente novamente.");
   }

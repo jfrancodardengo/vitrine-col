@@ -9,6 +9,6 @@
 export const SUPABASE_URL = "https://mbvjfzlwagbcpqqoqzuq.supabase.co";
 export const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_0b8pPsSVr3qQT3d4EBDjiA_-JATWVOc";
 
-// PROVISÓRIO (Dias 11 e 12): o login só chega no Dia 13, então as telas do painel usam a lojista de teste.
-// Troque pelo id da lojista de teste (Authentication > Users, coluna UID). Este valor será apagado no Dia 13.
-export const LOJISTA_DE_TESTE_ID = "9bf6c56c-d582-4466-8e41-27910cad3acd";
+// E-mail de contato da equipe, mostrado na página de privacidade (privacidade.html).
+// Troque pelo e-mail real da equipe antes de publicar o site.
+export const EMAIL_DE_CONTATO = "vitrinecol@gmail.com";

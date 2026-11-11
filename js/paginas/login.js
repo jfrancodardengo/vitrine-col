@@ -1,15 +1,25 @@
 // Página de login (RF-13). A página só valida, chama o serviço e mostra o resultado.
 import { montarCabecalho } from "../ui/cabecalho.js";
 import { mostrarCarregando, mostrarErro, mostrarSucesso, limparAvisos, mensagemDoErro, mostrarErroDoCampo, limparErrosDosCampos } from "../ui/avisos.js";
+import { enderecoDeRetornoSeguro } from "../ui/protecao.js";
 import { entrar, usuariaAtual, validarEntrada } from "../servicos/authServico.js";
 
 const formulario = document.getElementById("formulario-login");
 const campoEmail = document.getElementById("email");
 const campoSenha = document.getElementById("senha");
 const botao = formulario.querySelector('button[type="submit"]');
+const linkCadastro = document.getElementById("link-cadastro");
 
 const textoOriginalDoBotao = botao.textContent;
 let enviando = false;
+
+// "voltar" guarda a página que a usuária queria abrir (veja protecao.js). Só endereços do próprio site valem.
+const voltar = enderecoDeRetornoSeguro(new URLSearchParams(location.search).get("voltar"));
+
+// Quem vai se cadastrar também volta para a mesma página depois
+if (voltar) {
+  linkCadastro.href = "cadastro.html?voltar=" + encodeURIComponent(voltar);
+}
 
 function mostrarErrosDosCampos(erros) {
   const campos = { email: campoEmail, senha: campoSenha };
@@ -50,8 +60,8 @@ formulario.addEventListener("submit", async (evento) => {
   try {
     const usuaria = await entrar(dados.email, dados.senha);
     mostrarSucesso("Login feito! Redirecionando…");
-    // Vai para a página inicial do perfil dela (polimorfismo: cada perfil responde rotaInicial() do seu jeito)
-    location.assign(usuaria.rotaInicial());
+    // Volta para onde ela estava indo; se não houver, vai para a página inicial do perfil dela (polimorfismo)
+    location.assign(voltar ?? usuaria.rotaInicial());
   } catch (erro) {
     mostrarErro(mensagemDoErro(erro));
     enviando = false;
@@ -63,11 +73,11 @@ formulario.addEventListener("submit", async (evento) => {
 async function iniciar() {
   montarCabecalho();
 
-  // Quem já está logada não precisa ver o login: segue para a sua página inicial
+  // Quem já está logada não precisa ver o login: segue para o destino
   try {
     const usuaria = await usuariaAtual();
     if (usuaria) {
-      location.replace(usuaria.rotaInicial());
+      location.replace(voltar ?? usuaria.rotaInicial());
     }
   } catch (erro) {
     // Se não deu para verificar, o formulário continua disponível

@@ -2,6 +2,7 @@
 // Lista os produtos da loja (inclusive os inativos), com Editar, Ativar/Desativar e Excluir.
 import { montarCabecalho } from "../ui/cabecalho.js";
 import { mostrarCarregando, mostrarErro, mostrarSucesso, limparAvisos, mensagemDoErro } from "../ui/avisos.js";
+import { exigirPerfil } from "../ui/protecao.js";
 import { formatarPreco } from "../ui/formatadores.js";
 import { obterMinhaLoja } from "../servicos/lojaServico.js";
 import { listarProdutosDaLoja, definirAtivo, excluirProduto } from "../servicos/produtoServico.js";
@@ -140,6 +141,11 @@ async function excluir(produto, botao) {
 
 async function iniciar() {
   montarCabecalho();
+  const usuaria = await exigirPerfil("lojista");
+  if (!usuaria) {
+    return;
+  }
+
   mostrarCarregando();
   try {
     loja = await obterMinhaLoja();

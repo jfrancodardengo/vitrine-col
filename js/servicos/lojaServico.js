@@ -2,9 +2,10 @@
 import { exigirSupabase } from "../supabaseClient.js";
 import { ErroApp } from "../modelos/ErroApp.js";
 import { Loja } from "../modelos/Loja.js";
+import { Lojista } from "../modelos/Lojista.js";
 import { paraErroApp } from "./errosSupabase.js";
+import { usuariaAtual } from "./authServico.js";
 import { normalizarTelefone, telefoneValido } from "../ui/formatadores.js";
-import { LOJISTA_DE_TESTE_ID } from "../config.js";
 
 const CAMPOS_DA_LOJA = "id, nome, descricao, endereco, cidade, whatsapp, link_mapa";
 
@@ -109,12 +110,16 @@ function vazioParaNulo(texto) {
   return limpo === "" ? null : limpo;
 }
 
-// Devolve a loja da lojista, ou null se ela ainda não cadastrou (RN-01: no máximo uma loja).
-// PROVISÓRIO: até o login existir (Dia 13), a lojista é sempre a lojista de teste.
+// Devolve a loja da lojista logada, ou null se ela ainda não cadastrou (RN-01: no máximo uma loja).
 export async function obterMinhaLoja() {
   try {
+    const usuaria = await usuariaAtual();
+    if (!(usuaria instanceof Lojista)) {
+      throw new ErroApp("sem_permissao", "Só lojistas têm loja.");
+    }
+
     const supabase = exigirSupabase();
-    const { data, error } = await supabase.from("lojas").select(CAMPOS_DA_LOJA).eq("dono_id", LOJISTA_DE_TESTE_ID).maybeSingle();
+    const { data, error } = await supabase.from("lojas").select(CAMPOS_DA_LOJA).eq("dono_id", usuaria.id).maybeSingle();
     if (error) {
       throw error;
     }
@@ -128,6 +133,11 @@ export async function obterMinhaLoja() {
 export async function salvarLoja({ id, nome, descricao, endereco, cidade, whatsapp, linkMapa }) {
   try {
     ErroApp.lancarSeHouverErros(validarLoja({ nome, endereco, cidade, whatsapp, linkMapa }));
+
+    const usuaria = await usuariaAtual();
+    if (!(usuaria instanceof Lojista)) {
+      throw new ErroApp("sem_permissao", "Só lojistas podem cadastrar uma loja.");
+    }
 
     const linha = {
       nome: nome.trim(),
@@ -155,7 +165,7 @@ export async function salvarLoja({ id, nome, descricao, endereco, cidade, whatsa
       return data;
     }
 
-    const { data, error } = await supabase.from("lojas").insert({ dono_id: LOJISTA_DE_TESTE_ID, ...linha }).select(CAMPOS_DA_LOJA).single();
+    const { data, error } = await supabase.from("lojas").insert({ dono_id: usuaria.id, ...linha }).select(CAMPOS_DA_LOJA).single();
     if (error) {
       throw error;
     }

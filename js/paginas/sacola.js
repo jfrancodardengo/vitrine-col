@@ -1,11 +1,13 @@
-// Página da sacola: itens por loja, quantidades, total e "Finalizar" (RF-09, RF-10, RN-03, RN-10).
-// A sacola fica no navegador (localStorage). Nesta etapa (Aula 36) a finalização monta os pedidos e os botões de WhatsApp,
-// mas ainda não grava nada no banco e não exige login: isso entra no Dia 13.
+// Página da sacola: itens por loja, quantidades, total e "Finalizar" (RF-09, RF-10, RN-03, RN-04, RN-10).
+// A sacola fica no navegador (localStorage); só ao finalizar ela vira pedidos no banco.
 import { montarCabecalho, atualizarContadorSacola } from "../ui/cabecalho.js";
 import { mostrarCarregando, mostrarErro, mostrarInfo, limparAvisos, mensagemDoErro } from "../ui/avisos.js";
+import { irParaOLogin } from "../ui/protecao.js";
 import { formatarPreco, criarLinkDoWhatsapp } from "../ui/formatadores.js";
 import { ErroApp } from "../modelos/ErroApp.js";
+import { Cliente } from "../modelos/Cliente.js";
 import { Sacola } from "../modelos/Sacola.js";
+import { usuariaAtual } from "../servicos/authServico.js";
 import { criarPedidos } from "../servicos/pedidoServico.js";
 import { listarContatosDasLojas } from "../servicos/lojaServico.js";
 import { criarElemento } from "../ui/elementos.js";
@@ -241,7 +243,8 @@ function liberarBotao() {
 }
 
 async function finalizar() {
-  // A trava liga JÁ no primeiro clique, antes de qualquer espera: cliques seguidos não podem criar o pedido várias vezes.
+  // A trava liga JÁ no primeiro clique, antes de qualquer espera. Se ela só ligasse depois de consultar o login,
+  // cliques seguidos passariam todos pela checagem e gravariam o pedido várias vezes.
   if (enviando) {
     return;
   }
@@ -249,8 +252,29 @@ async function finalizar() {
   botaoFinalizar.disabled = true;
   limparAvisos();
 
+  let usuaria;
+  try {
+    usuaria = await usuariaAtual();
+  } catch (erro) {
+    mostrarErro(mensagemDoErro(erro));
+    liberarBotao();
+    return;
+  }
+
+  // RN-04: sem login não há pedido. Ela vai entrar e volta para esta página, com a sacola intacta
+  if (!usuaria) {
+    liberarBotao(); // se ela voltar com o botão "Voltar" do navegador, o botão não pode ficar travado
+    irParaOLogin();
+    return;
+  }
+  if (!(usuaria instanceof Cliente)) {
+    mostrarErro("Só contas de cliente fazem pedidos. Entre com uma conta de cliente.");
+    liberarBotao();
+    return;
+  }
+
   botaoFinalizar.textContent = "Enviando pedidos…";
-  mostrarCarregando("Montando os pedidos…");
+  mostrarCarregando("Gravando os pedidos…");
 
   let pedidos;
   try {

@@ -320,6 +320,15 @@
   margin-top: var(--espaco-3);
 }
 
+/* ---------- Privacidade ---------- */
+.texto-longo {
+  max-width: 45rem;
+}
+
+.texto-longo ul {
+  margin: 0 0 var(--espaco-3) var(--espaco-5);
+}
+
 /* ---------- Tablet ---------- */
 @media (min-width: 768px) {
   .filtros-campos {

@@ -1,8 +1,9 @@
-// Painel da lojista: cadastrar e editar produto, com tamanhos e fotos.
-// A página só valida, chama os serviços e mostra o resultado.
+// Painel da lojista: cadastrar e editar produto, com tamanhos e fotos (RF-16, RF-17, RF-19, RN-02, RN-12).
+// Só a lojista abre esta tela (RF-14). A página só valida, chama os serviços e mostra o resultado.
 // Para editar, o endereço traz o id: painel-produto-form.html?id=...
 import { montarCabecalho } from "../ui/cabecalho.js";
 import { mostrarCarregando, mostrarErro, limparAvisos, mensagemDoErro, mostrarErroDoCampo, limparErroDoCampo, limparErrosDosCampos } from "../ui/avisos.js";
+import { exigirPerfil } from "../ui/protecao.js";
 import { criarListaDeFotos } from "../ui/listaDeFotos.js";
 import { ErroApp } from "../modelos/ErroApp.js";
 import { obterMinhaLoja } from "../servicos/lojaServico.js";
@@ -285,6 +286,11 @@ function preencherFormulario(produto) {
 
 async function iniciar() {
   montarCabecalho();
+  const usuaria = await exigirPerfil("lojista");
+  if (!usuaria) {
+    return;
+  }
+
   if (editando) {
     titulo.textContent = "Editar produto";
   }

@@ -2,6 +2,7 @@
 // A página só valida, chama o serviço e mostra o resultado e os avisos.
 import { montarCabecalho } from "../ui/cabecalho.js";
 import { mostrarCarregando, mostrarErro, mostrarSucesso, mostrarInfo, limparAvisos, mensagemDoErro, mostrarErroDoCampo, limparErrosDosCampos } from "../ui/avisos.js";
+import { exigirPerfil } from "../ui/protecao.js";
 import { obterMinhaLoja, salvarLoja, validarLoja } from "../servicos/lojaServico.js";
 
 const formulario = document.getElementById("formulario-loja");
@@ -93,6 +94,11 @@ formulario.addEventListener("submit", async (evento) => {
 
 async function iniciar() {
   montarCabecalho();
+  const usuaria = await exigirPerfil("lojista");
+  if (!usuaria) {
+    return;
+  }
+
   mostrarCarregando();
   try {
     lojaAtual = await obterMinhaLoja();

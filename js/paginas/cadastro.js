@@ -1,11 +1,13 @@
 // Página de cadastro (RF-12). A página só valida, chama o serviço e mostra o resultado.
 import { montarCabecalho } from "../ui/cabecalho.js";
 import { mostrarCarregando, mostrarErro, mostrarSucesso, limparAvisos, mensagemDoErro, mostrarErroDoCampo, limparErrosDosCampos } from "../ui/avisos.js";
+import { enderecoDeRetornoSeguro } from "../ui/protecao.js";
 import { ErroApp } from "../modelos/ErroApp.js";
 import { cadastrar, usuariaAtual, validarCadastro } from "../servicos/authServico.js";
 
 const formulario = document.getElementById("formulario-cadastro");
 const botao = formulario.querySelector('button[type="submit"]');
+const linkLogin = document.getElementById("link-login");
 
 // Na ordem em que aparecem na tela; o foco vai para o primeiro que tiver erro
 const campos = {
@@ -17,6 +19,13 @@ const campos = {
 
 const textoOriginalDoBotao = botao.textContent;
 let enviando = false;
+
+const voltar = enderecoDeRetornoSeguro(new URLSearchParams(location.search).get("voltar"));
+
+// Quem já tem conta volta para a mesma página depois do login
+if (voltar) {
+  linkLogin.href = "login.html?voltar=" + encodeURIComponent(voltar);
+}
 
 function lerDados() {
   return {
@@ -93,8 +102,8 @@ formulario.addEventListener("submit", async (evento) => {
     }
 
     mostrarSucesso("Conta criada! Redirecionando…");
-    // A usuária já está logada: segue para a página inicial do perfil escolhido
-    location.assign(resultado.usuaria.rotaInicial());
+    // A usuária já está logada: segue para onde ia, ou para a página inicial do perfil escolhido
+    location.assign(voltar ?? resultado.usuaria.rotaInicial());
   } catch (erro) {
     limparAvisos();
     mostrarErroDoServidor(erro);
@@ -111,7 +120,7 @@ async function iniciar() {
   try {
     const usuaria = await usuariaAtual();
     if (usuaria) {
-      location.replace(usuaria.rotaInicial());
+      location.replace(voltar ?? usuaria.rotaInicial());
     }
   } catch (erro) {
     // Se não deu para verificar, o formulário continua disponível
