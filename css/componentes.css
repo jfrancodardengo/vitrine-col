@@ -545,6 +545,39 @@ fieldset.campo legend {
   border-radius: var(--raio-pilula);
 }
 
+/* ---------- Menu do cabeçalho: nome da usuária e botão Sair ---------- */
+.menu-nome {
+  display: inline-block;
+  max-width: 12rem;
+  padding: var(--espaco-2) var(--espaco-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+  color: var(--cor-texto-suave);
+}
+
+.menu-botao {
+  padding: var(--espaco-2) var(--espaco-1);
+  font: inherit;
+  font-weight: 600;
+  color: var(--cor-texto);
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+}
+
+.menu-botao:hover {
+  color: var(--cor-primaria-escura);
+  border-bottom-color: var(--cor-primaria);
+}
+
+.menu-botao:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* ---------- Erro ao lado de um campo de formulário ---------- */
 .campo-erro {
   margin: 0;

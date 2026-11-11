@@ -1,6 +1,10 @@
-// Gera o cabeçalho comum das páginas.
+// Gera o cabeçalho comum das páginas e mantém o contador de itens da sacola.
 // Cada página tem um <header id="cabecalho"> vazio, que este arquivo preenche.
+// O menu muda conforme quem está logada: visitante, cliente ou lojista.
 import { Sacola } from "../modelos/Sacola.js";
+import { Lojista } from "../modelos/Lojista.js";
+import { usuariaAtual, sair, observarSessao } from "../servicos/authServico.js";
+import { mostrarErro, mensagemDoErro } from "./avisos.js";
 
 // Links que todo mundo vê.
 const LINKS_FIXOS = [
@@ -9,12 +13,22 @@ const LINKS_FIXOS = [
   { texto: "Sacola", arquivo: "sacola.html", comContador: true },
 ];
 
-// Links da conta. Por enquanto toda pessoa é visitante, porque o login só chega no Dia 13.
-function linksDaConta() {
-  return [
-    { texto: "Entrar", arquivo: "login.html" },
-    { texto: "Cadastrar", arquivo: "cadastro.html" },
-  ];
+// Links que dependem de quem está logada.
+// usuaria === undefined: ainda estamos descobrindo; null: visitante; objeto: Cliente ou Lojista.
+function linksDaConta(usuaria) {
+  if (usuaria === undefined) {
+    return [];
+  }
+  if (usuaria === null) {
+    return [
+      { texto: "Entrar", arquivo: "login.html" },
+      { texto: "Cadastrar", arquivo: "cadastro.html" },
+    ];
+  }
+  // A lojista tem o painel; a cliente tem Meus pedidos
+  return usuaria instanceof Lojista
+    ? [{ texto: "Painel", arquivo: "painel-loja.html" }]
+    : [{ texto: "Meus pedidos", arquivo: "meus-pedidos.html" }];
 }
 
 // Atualiza o número no cabeçalho; as outras partes do site chamam isto depois de mudar a sacola.
@@ -64,7 +78,43 @@ function criarLink(link, arquivoAtual) {
   return item;
 }
 
-export function montarCabecalho() {
+// Nome da usuária (link para Minha conta) e botão Sair: só aparecem para quem está logada.
+function criarItensDaUsuaria(usuaria, arquivoAtual) {
+  const itemNome = document.createElement("li");
+  const nome = document.createElement("a");
+  nome.className = "menu-nome";
+  nome.href = "minha-conta.html";
+  // textContent: o nome vem do banco, então nunca entra como HTML
+  nome.textContent = "Olá, " + usuaria.nome;
+  nome.title = "Minha conta";
+  if (arquivoAtual === "minha-conta.html") {
+    nome.setAttribute("aria-current", "page");
+  }
+  itemNome.append(nome);
+
+  const itemSair = document.createElement("li");
+  const botao = document.createElement("button");
+  botao.type = "button";
+  botao.className = "menu-botao";
+  botao.textContent = "Sair";
+  botao.addEventListener("click", () => sairDaConta(botao));
+  itemSair.append(botao);
+
+  return [itemNome, itemSair];
+}
+
+async function sairDaConta(botao) {
+  botao.disabled = true;
+  try {
+    await sair();
+    location.assign("index.html");
+  } catch (erro) {
+    botao.disabled = false;
+    mostrarErro(mensagemDoErro(erro));
+  }
+}
+
+export async function montarCabecalho() {
   const cabecalho = document.getElementById("cabecalho");
   if (!cabecalho) {
     return;
@@ -83,8 +133,6 @@ export function montarCabecalho() {
 
   const menu = document.createElement("ul");
   menu.className = "menu";
-  const itens = [...LINKS_FIXOS, ...linksDaConta()].map((link) => criarLink(link, arquivoAtual));
-  menu.replaceChildren(...itens);
 
   const navegacao = document.createElement("nav");
   navegacao.setAttribute("aria-label", "Principal");
@@ -93,7 +141,31 @@ export function montarCabecalho() {
   conteudo.append(logotipo, navegacao);
   cabecalho.replaceChildren(conteudo);
 
-  atualizarContadorSacola();
+  // Redesenha o menu para a usuária informada (undefined = ainda descobrindo, null = visitante)
+  function desenharMenu(usuaria) {
+    const itens = [...LINKS_FIXOS, ...linksDaConta(usuaria)].map((link) => criarLink(link, arquivoAtual));
+    if (usuaria) {
+      itens.push(...criarItensDaUsuaria(usuaria, arquivoAtual));
+    }
+    menu.replaceChildren(...itens);
+    atualizarContadorSacola();
+
+  }
+
+  // Primeiro só os links fixos: assim a visitante não vê "Entrar" piscar quando já está logada
+  desenharMenu(undefined);
+
+  let usuaria = null;
+  try {
+    usuaria = await usuariaAtual();
+  } catch (erro) {
+    // Sem conseguir saber quem está logada, mostramos o menu de visitante; o detalhe vai para o console
+    console.warn(erro.codigo, erro.cause ?? "");
+  }
+  desenharMenu(usuaria);
+
+  // Se ela entrar ou sair (inclusive em outra aba), o menu acompanha
+  observarSessao(desenharMenu);
 
   // Se a sacola mudar em outra aba, o contador acompanha
   window.addEventListener("storage", atualizarContadorSacola);
