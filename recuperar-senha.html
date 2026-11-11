@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recuperar senha – VitrineCol</title>
+  <link rel="stylesheet" href="css/variaveis.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/paginas.css">
+</head>
+
+<body>
+  <a class="link-pular" href="#conteudo">Ir para o conteúdo</a>
+  <header class="cabecalho" id="cabecalho"></header>
+
+  <main id="conteudo" class="container">
+    <div class="cartao-formulario">
+      <h1>Recuperar senha</h1>
+
+      <!-- Etapa 1: a pessoa informa o e-mail e recebe o link -->
+      <section id="etapa-pedido" aria-labelledby="titulo-pedido">
+        <h2 id="titulo-pedido" class="visualmente-oculto">Receber o link por e-mail</h2>
+        <p>Informe o e-mail da sua conta. Enviaremos um link para você criar uma senha nova.</p>
+        <form class="formulario" id="formulario-pedido" novalidate>
+          <div class="campo">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" autocomplete="email" required>
+          </div>
+          <button type="submit" class="botao">Enviar link</button>
+        </form>
+      </section>
+
+      <!-- Etapa 2: aparece quando a pessoa volta pelo link do e-mail -->
+      <section id="etapa-nova-senha" aria-labelledby="titulo-nova-senha" hidden>
+        <h2 id="titulo-nova-senha" class="visualmente-oculto">Criar uma senha nova</h2>
+        <p>Escolha a sua senha nova.</p>
+        <form class="formulario" id="formulario-nova-senha" novalidate>
+          <!-- Campo escondido só para o gerenciador de senhas do navegador saber de qual conta é a senha nova -->
+          <input type="email" id="usuario" name="usuario" autocomplete="username" hidden>
+          <div class="campo">
+            <label for="senha">Senha nova</label>
+            <input type="password" id="senha" name="senha" autocomplete="new-password" aria-describedby="ajuda-senha"
+              required>
+            <p class="campo-ajuda" id="ajuda-senha">Use pelo menos 6 caracteres.</p>
+          </div>
+          <div class="campo">
+            <label for="confirmacao">Repita a senha nova</label>
+            <input type="password" id="confirmacao" name="confirmacao" autocomplete="new-password" required>
+          </div>
+          <button type="submit" class="botao">Salvar senha nova</button>
+        </form>
+      </section>
+
+      <p><a href="login.html">Voltar para o login</a></p>
+    </div>
+  </main>
+
+  <footer class="rodape">
+    <div class="container">
+      <ul class="rodape-links">
+        <li><a href="privacidade.html">Aviso de privacidade</a></li>
+        <li><a href="meus-pedidos.html">Meus pedidos</a></li>
+        <li><a href="painel-loja.html">Painel da loja</a></li>
+      </ul>
+      <p>Projeto integrador – Jovem Programadora (Senac). Pagamento e entrega são combinados direto com a loja.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="js/paginas/recuperarSenha.js"></script>
+</body>
+
+</html>

@@ -52,6 +52,27 @@ export function validarEntrada({ email, senha }) {
   return erros;
 }
 
+// RF-24: o e-mail do pedido de redefinição de senha
+export function validarEmailDeRecuperacao({ email }) {
+  const erros = {};
+  if (!FORMATO_DE_EMAIL.test(String(email ?? "").trim())) {
+    erros.email = "Informe um e-mail válido, por exemplo nome@email.com.";
+  }
+  return erros;
+}
+
+// RF-24: a nova senha e a confirmação digitada de novo
+export function validarNovaSenha({ senha, confirmacao }) {
+  const erros = {};
+  if (String(senha ?? "").length < SENHA_MINIMA) {
+    erros.senha = "A senha deve ter pelo menos " + SENHA_MINIMA + " caracteres.";
+  }
+  if (String(confirmacao ?? "") !== String(senha ?? "")) {
+    erros.confirmacao = "As senhas não são iguais.";
+  }
+  return erros;
+}
+
 // ---------- Cadastro, login e logout ----------
 
 // Cria a conta. O perfil (cliente ou lojista) é gravado pelo gatilho do banco, a partir de "data" (RN-11).
@@ -208,5 +229,57 @@ export function observarSessao(callback) {
     return () => data.subscription.unsubscribe();
   } catch (erro) {
     return () => {};
+  }
+}
+
+// ---------- Esqueci minha senha (RF-24) ----------
+
+// Pede ao Supabase que envie à pessoa um e-mail com o link para criar uma senha nova.
+// O link volta para recuperar-senha.html (o endereço precisa estar liberado em Authentication > URL Configuration).
+// Por segurança o Supabase não diz se o e-mail tem conta; por isso a tela mostra sempre a mesma mensagem.
+export async function pedirRedefinicaoDeSenha(email) {
+  try {
+    ErroApp.lancarSeHouverErros(validarEmailDeRecuperacao({ email }));
+    const supabase = exigirSupabase();
+
+    // new URL(...) descarta o que houver depois do "?" ou do "#" do endereço atual
+    const enderecoDeRetorno = new URL("recuperar-senha.html", location.href).href;
+    const { error } = await supabase.auth.resetPasswordForEmail(String(email).trim(), { redirectTo: enderecoDeRetorno });
+    if (error) {
+      throw error;
+    }
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível enviar o e-mail agora. Tente novamente em instantes.");
+  }
+}
+
+// Quem clica no link do e-mail volta ao site já com uma sessão especial de recuperação, e o Supabase
+// avisa com o evento PASSWORD_RECOVERY. Chama "callback" nesse caso. Devolve uma função para parar de observar.
+export function aoReceberLinkDeRecuperacao(callback) {
+  if (configuracaoDeExemplo) {
+    return () => {};
+  }
+  try {
+    const { data } = exigirSupabase().auth.onAuthStateChange((evento) => {
+      if (evento === "PASSWORD_RECOVERY") {
+        callback();
+      }
+    });
+    return () => data.subscription.unsubscribe();
+  } catch (erro) {
+    return () => {};
+  }
+}
+
+// Grava a senha nova da pessoa que chegou pelo link do e-mail.
+export async function definirNovaSenha({ senha, confirmacao }) {
+  try {
+    ErroApp.lancarSeHouverErros(validarNovaSenha({ senha, confirmacao }));
+    const { error } = await exigirSupabase().auth.updateUser({ password: senha });
+    if (error) {
+      throw error;
+    }
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível trocar a senha. Peça um novo link e tente de novo.");
   }
 }
