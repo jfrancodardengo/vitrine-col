@@ -5,9 +5,21 @@ const formatadorDeMoeda = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
 });
 
+const formatadorDeData = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+
 // 189.9 -> "R$ 189,90"
 export function formatarPreco(valor) {
   return formatadorDeMoeda.format(Number(valor));
+}
+
+// Aceita um Date ou um texto de data (por exemplo o criado_em do banco).
+// "2026-11-05T14:30:00Z" -> "05/11/2026"
+export function formatarData(data) {
+  return formatadorDeData.format(new Date(data));
 }
 
 // Deixa só os dígitos de um telefone e, se faltar o código do país, acrescenta o 55 (RN-10).

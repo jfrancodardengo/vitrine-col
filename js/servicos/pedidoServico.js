@@ -96,3 +96,98 @@ export async function criarPedidos(sacola) {
     throw paraErroApp(erro, "Não foi possível enviar o pedido. Verifique sua conexão e tente novamente.");
   }
 }
+
+// =====================================================================
+// Acompanhamento do pedidos: Meus pedidos, pedidos recebidos e aviso de novidades
+// (RF-11, RF-20, RF-22, RN-13). Quem pode ler ou alterar o quê é decidido pelas regras RLS do banco.
+// =====================================================================
+
+// Colunas do pedido, com a loja e os itens (cada item com o nome do produto).
+const CAMPOS_DO_PEDIDO =
+  "id, grupo_id, loja_id, cliente_id, status, total, mensagem_loja, status_visto, atualizado_em, criado_em, " +
+  "lojas ( id, nome ), " +
+  "itens_pedido ( id, produto_id, tamanho, quantidade, preco_unitario, produtos ( nome ) )";
+
+// Para a lojista, o pedido vem também com o nome e o telefone da cliente (as regras RLS liberam só as clientes dos pedidos dela)
+const CAMPOS_DO_PEDIDO_COM_CLIENTE = CAMPOS_DO_PEDIDO + ", perfis ( nome, telefone )";
+
+const TAMANHO_MAXIMO_DO_RECADO = 500;
+
+// RF-20: os pedidos recebidos pela loja da lojista, do mais recente ao mais antigo, com o nome e o telefone da cliente.
+export async function listarPedidosDaMinhaLoja(lojaId) {
+  try {
+    const supabase = exigirSupabase();
+    const { data, error } = await supabase
+      .from("pedidos")
+      .select(CAMPOS_DO_PEDIDO_COM_CLIENTE)
+      .eq("loja_id", lojaId)
+      .order("criado_em", { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+    return data;
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível carregar os pedidos recebidos. Verifique sua conexão e tente novamente.");
+  }
+}
+
+// RF-20, RN-05, RN-13: a lojista muda o status e/ou deixa um recado, numa ÚNICA atualização.
+// Os dois campos são opcionais: só o recado ({ mensagemLoja }) ou só o status ({ status }) também valem.
+// Um recado vazio apaga o recado. Devolve o pedido já atualizado (mesmo formato de listarPedidosDaMinhaLoja).
+//
+// O banco só deixa mudar status e recado (um gatilho recusa o resto) e marca o pedido como novidade para a cliente.
+// Mas o banco NÃO confere o fluxo da RN-05; quem impede, por exemplo, "cancelado" voltar para "confirmado" é este código.
+export async function atualizarPedido(id, { status, mensagemLoja } = {}) {
+  try {
+    const mudancas = {};
+
+    if (mensagemLoja !== undefined) {
+      const recado = String(mensagemLoja ?? "").trim();
+      if (recado.length > TAMANHO_MAXIMO_DO_RECADO) {
+        throw new ErroApp("recado_longo", "O recado deve ter no máximo " + TAMANHO_MAXIMO_DO_RECADO + " caracteres.");
+      }
+      mudancas.mensagem_loja = recado === "" ? null : recado;
+    }
+
+    const supabase = exigirSupabase();
+
+    // Como o pedido está agora: serve para conferir a transição de status
+    const { data: atual, error: erroAoLer } = await supabase.from("pedidos").select("id, status").eq("id", id).maybeSingle();
+    if (erroAoLer) {
+      throw erroAoLer;
+    }
+    if (!atual) {
+      throw new ErroApp("pedido_nao_encontrado", "Pedido não encontrado.");
+    }
+
+    if (status !== undefined && status !== atual.status) {
+      if (!Pedido.statusPermitidos(atual.status).includes(status)) {
+        throw new ErroApp("status_nao_permitido", "Esta mudança de status não é permitida para este pedido.");
+      }
+      mudancas.status = status;
+    }
+
+    if (Object.keys(mudancas).length === 0) {
+      throw new ErroApp("nada_a_salvar", "Não há nenhuma mudança para salvar.");
+    }
+
+    // O filtro por status evita atropelar uma mudança feita em outra aba ou aparelho
+    const { data: alterados, error: erroAoAtualizar } = await supabase
+      .from("pedidos")
+      .update(mudancas)
+      .eq("id", id)
+      .eq("status", atual.status)
+      .select(CAMPOS_DO_PEDIDO_COM_CLIENTE);
+
+    if (erroAoAtualizar) {
+      throw erroAoAtualizar;
+    }
+    if (alterados.length === 0) {
+      throw new ErroApp("pedido_nao_atualizado", "O pedido mudou em outro lugar ou não é da sua loja. Recarregue a página.");
+    }
+    return alterados[0];
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível atualizar o pedido. Verifique sua conexão e tente novamente.");
+  }
+}

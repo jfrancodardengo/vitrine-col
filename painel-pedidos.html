@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pedidos recebidos – VitrineCol</title>
+  <link rel="stylesheet" href="css/variaveis.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/paginas.css">
+</head>
+
+<body>
+  <a class="link-pular" href="#conteudo">Ir para o conteúdo</a>
+  <header class="cabecalho" id="cabecalho"></header>
+
+  <main id="conteudo" class="container" hidden>
+    <nav aria-label="Painel da lojista">
+      <ul class="navegacao-painel">
+        <li><a href="painel-loja.html">Minha loja</a></li>
+        <li><a href="painel-produtos.html">Meus produtos</a></li>
+        <li><a href="painel-pedidos.html" aria-current="page">Pedidos recebidos</a></li>
+      </ul>
+    </nav>
+
+    <h1>Pedidos recebidos</h1>
+    <p class="visualmente-oculto" id="anuncio-pedidos" role="status" aria-live="polite"></p>
+
+    <p class="aviso aviso-info" id="aviso-sem-loja" role="status" hidden>
+      Cadastre a sua loja para receber pedidos. <a href="painel-loja.html">Ir para Minha loja</a>
+    </p>
+
+    <p class="aviso aviso-info" id="mensagem-sem-pedidos" role="status" hidden>Sua loja ainda não recebeu nenhum pedido.
+    </p>
+
+    <div id="lista-pedidos"></div>
+  </main>
+
+  <footer class="rodape">
+    <div class="container">
+      <ul class="rodape-links">
+        <li><a href="privacidade.html">Aviso de privacidade</a></li>
+        <li><a href="meus-pedidos.html">Meus pedidos</a></li>
+        <li><a href="painel-loja.html">Painel da loja</a></li>
+      </ul>
+      <p>Projeto integrador – Jovem Programadora (Senac). Pagamento e entrega são combinados direto com a loja.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="js/paginas/painelPedidos.js"></script>
+</body>
+
+</html>
