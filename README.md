@@ -10,5 +10,7 @@ pedido por loja, combinado pelo WhatsApp. Lojistas cadastram a loja e os produto
 - Nome da primeira integrante
 
 ## Como rodar
+Site: https://jfrancodardengo.github.io/vitrine-col/
 
 Abra a pasta no VS Code e clique em **Go Live** (extensão Live Server).
+
