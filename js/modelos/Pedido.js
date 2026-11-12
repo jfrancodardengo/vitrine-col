@@ -21,6 +21,14 @@ const ROTULOS_PARA_CLIENTE = {
   cancelado: "Cancelado",
 };
 
+// Textos que a lojista enxerga no painel.
+const ROTULOS_PARA_LOJISTA = {
+  novo: "Novo",
+  confirmado: "Confirmado",
+  concluido: "Concluído",
+  cancelado: "Cancelado",
+};
+
 export class Pedido {
   #id; // fica vazio até o pedido ser gravado no banco
   #grupoId;
@@ -28,6 +36,11 @@ export class Pedido {
   #lojaNome;
   #status;
   #itens; // cada item: { produtoId, nome, tamanho, quantidade, precoUnitario }
+  #mensagemLoja; // recado da lojista para a cliente (RN-13)
+  #statusVisto; // false = a cliente ainda não viu a novidade (RN-13)
+  #criadoEm;
+  #clienteNome; // só vem preenchido para a lojista (ela lê o perfil das clientes dos seus pedidos)
+  #clienteTelefone;
 
   constructor({
     id = null,
@@ -36,6 +49,11 @@ export class Pedido {
     lojaNome = "",
     status = "novo",
     itens,
+    mensagemLoja = "",
+    statusVisto = true,
+    criadoEm = null,
+    clienteNome = "",
+    clienteTelefone = "",
   }) {
     if (!grupoId) {
       throw new ErroApp("grupo_invalido", "O pedido precisa de um grupo.");
@@ -56,10 +74,35 @@ export class Pedido {
     this.#lojaNome = lojaNome;
     this.#status = status;
     this.#itens = itens.map((item) => ({ ...item }));
+    this.#mensagemLoja = String(mensagemLoja ?? "");
+    this.#statusVisto = statusVisto !== false;
+    this.#criadoEm = criadoEm;
+    this.#clienteNome = clienteNome ?? "";
+    this.#clienteTelefone = clienteTelefone ?? "";
   }
 
   get id() {
     return this.#id;
+  }
+  
+  get mensagemLoja() {
+    return this.#mensagemLoja;
+  }
+
+  get statusVisto() {
+    return this.#statusVisto;
+  }
+
+  get criadoEm() {
+    return this.#criadoEm;
+  }
+
+  get clienteNome() {
+    return this.#clienteNome;
+  }
+
+  get clienteTelefone() {
+    return this.#clienteTelefone;
   }
 
   get grupoId() {
@@ -124,6 +167,57 @@ export class Pedido {
     );
   }
 
+  // Monta um Pedido a partir de uma linha do banco (colunas em snake_case, com as tabelas relacionadas dentro):
+  // lojas, itens_pedido (cada item com o seu produto) e, para a lojista, o perfil da cliente.
+  static deLinha(linha) {
+    return new Pedido({
+      id: linha.id,
+      grupoId: linha.grupo_id,
+      lojaId: linha.loja_id,
+      lojaNome: linha.lojas?.nome ?? "",
+      status: linha.status,
+      itens: (linha.itens_pedido ?? []).map((item) => ({
+        produtoId: item.produto_id,
+        // Se o produto saiu do catálogo (foi desativado), a leitura pública não o devolve: usamos um nome neutro
+        nome: item.produtos?.nome ?? "Produto indisponível",
+        tamanho: item.tamanho,
+        quantidade: item.quantidade,
+        precoUnitario: Number(item.preco_unitario),
+      })),
+      mensagemLoja: linha.mensagem_loja ?? "",
+      statusVisto: linha.status_visto,
+      criadoEm: linha.criado_em,
+      clienteNome: linha.perfis?.nome ?? "",
+      clienteTelefone: linha.perfis?.telefone ?? "",
+    });
+  }
+
+  // RN-05: para quais status um pedido que está em "statusAtual" pode ir. Estático para o serviço
+  // conferir a transição sem precisar montar um Pedido inteiro.
+  static statusPermitidos(statusAtual) {
+    return [...(FLUXO_DE_STATUS[statusAtual] ?? [])];
+  }
+
+  // Lista os status para os quais este pedido pode ir agora (RN-05).
+  proximosStatus() {
+    return Pedido.statusPermitidos(this.#status);
+  }
+
+  // Muda o status, mas só se o fluxo permitir; senão lança ErroApp.
+  alterarStatus(novoStatus) {
+    if (!this.proximosStatus().includes(novoStatus)) {
+      throw new ErroApp(
+        "status_nao_permitido",
+        'Não é possível mudar o pedido de "' +
+          ROTULOS_PARA_CLIENTE[this.#status] +
+          '" para "' +
+          (ROTULOS_PARA_CLIENTE[novoStatus] ?? novoStatus) +
+          '".'
+      );
+    }
+    this.#status = novoStatus;
+  }
+
   // Código curto para a cliente e a loja se referirem ao pedido: os 8 primeiros caracteres do id.
   codigoCurto() {
     return String(this.#id ?? "").slice(0, 8);
@@ -152,4 +246,18 @@ export class Pedido {
     return ROTULOS_PARA_CLIENTE[this.#status];
   }
 
+  rotuloParaLojista() {
+    return ROTULOS_PARA_LOJISTA[this.#status];
+  }
+
+  // Aviso que a lojista pode mandar à cliente pelo WhatsApp (RF-22, desejável):
+  // "Olá, <nome>! Seu pedido #<código> na <loja> agora está: <rótulo>. <recado, se houver>"
+  mensagemDeStatusParaCliente() {
+    const recado = this.#mensagemLoja.trim();
+    return (
+      "Olá, " + this.#clienteNome + "! Seu pedido #" + this.codigoCurto() + " na " + this.#lojaNome +
+      " agora está: " + this.rotuloParaCliente() + "." + (recado ? " " + recado : "")
+    );
+  }
+  
 }

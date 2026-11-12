@@ -412,6 +412,11 @@ h1[tabindex="-1"]:focus {
   outline: none;
 }
 
+/* ---------- Pedidos recebidos: botão de aviso pelo WhatsApp ---------- */
+.pedido-atualizar + .botao-whatsapp {
+  margin-top: var(--espaco-3);
+}
+
 /* ---------- Botão "Carregar mais" do catálogo ---------- */
 .paginacao {
   margin-top: var(--espaco-5);
