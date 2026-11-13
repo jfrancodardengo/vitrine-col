@@ -3,8 +3,14 @@
 // O menu muda conforme quem está logada: visitante, cliente ou lojista.
 import { Sacola } from "../modelos/Sacola.js";
 import { Lojista } from "../modelos/Lojista.js";
+import { Cliente } from "../modelos/Cliente.js";
 import { usuariaAtual, sair, observarSessao } from "../servicos/authServico.js";
+import { contarNovidades } from "../servicos/pedidoServico.js";
 import { mostrarErro, mensagemDoErro } from "./avisos.js";
+
+// De quanto em quanto tempo o contador de novidades dos pedidos é consultado de novo (RF-22)
+export const INTERVALO_DAS_NOVIDADES_EM_MS = 60000;
+let temporizadorDasNovidades = null;
 
 // Links que todo mundo vê.
 const LINKS_FIXOS = [
@@ -28,7 +34,43 @@ function linksDaConta(usuaria) {
   // A lojista tem o painel; a cliente tem Meus pedidos
   return usuaria instanceof Lojista
     ? [{ texto: "Painel", arquivo: "painel-loja.html" }]
-    : [{ texto: "Meus pedidos", arquivo: "meus-pedidos.html" }];
+    : [{ texto: "Meus pedidos", arquivo: "meus-pedidos.html", comNovidades: true }];
+}
+
+// Atualiza o contador de pedidos com novidades (RF-22) no link "Meus pedidos".
+// Se a consulta falhar, o contador fica como estava: um aviso secundário nunca pode derrubar a página.
+export async function atualizarContadorDeNovidades() {
+  const numero = document.getElementById("contador-novidades");
+  const texto = document.getElementById("contador-novidades-texto");
+  if (!numero || !texto) {
+    return;
+  }
+
+  let total;
+  try {
+    total = await contarNovidades();
+  } catch (erro) {
+    console.warn(erro.codigo, erro.cause ?? "");
+    return;
+  }
+
+  numero.textContent = String(total);
+  // O número visível some para o leitor de tela (aria-hidden no HTML criado abaixo); o texto escondido diz a frase completa
+  texto.textContent = " " + total + (total === 1 ? " pedido com novidades" : " pedidos com novidades");
+  numero.hidden = total === 0;
+  texto.hidden = total === 0;
+}
+
+function pararDeVerNovidades() {
+  clearInterval(temporizadorDasNovidades);
+  temporizadorDasNovidades = null;
+}
+
+// Só a cliente tem novidades nos pedidos: consulta agora e depois de tempos em tempos
+function comecarAVerNovidades() {
+  pararDeVerNovidades();
+  atualizarContadorDeNovidades();
+  temporizadorDasNovidades = setInterval(atualizarContadorDeNovidades, INTERVALO_DAS_NOVIDADES_EM_MS);
 }
 
 // Atualiza o número no cabeçalho; as outras partes do site chamam isto depois de mudar a sacola.
@@ -69,6 +111,22 @@ function criarLink(link, arquivoAtual) {
     texto.id = "contador-sacola-texto";
     texto.className = "visualmente-oculto";
     texto.textContent = " itens na sacola";
+    texto.hidden = true;
+
+    a.append(numero, texto);
+  }
+
+  if (link.comNovidades) {
+    // Número visível (escondido do leitor de tela) + frase completa só para o leitor de tela: "2 pedidos com novidades"
+    const numero = document.createElement("span");
+    numero.id = "contador-novidades";
+    numero.className = "contador-sacola";
+    numero.setAttribute("aria-hidden", "true");
+    numero.hidden = true;
+
+    const texto = document.createElement("span");
+    texto.id = "contador-novidades-texto";
+    texto.className = "visualmente-oculto";
     texto.hidden = true;
 
     a.append(numero, texto);
@@ -150,6 +208,12 @@ export async function montarCabecalho() {
     menu.replaceChildren(...itens);
     atualizarContadorSacola();
 
+    // Só a cliente tem o contador de novidades dos pedidos; para as outras, para de consultar
+    if (usuaria instanceof Cliente) {
+      comecarAVerNovidades();
+    } else {
+      pararDeVerNovidades();
+    }
   }
 
   // Primeiro só os links fixos: assim a visitante não vê "Entrar" piscar quando já está logada
