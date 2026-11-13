@@ -113,6 +113,31 @@ const CAMPOS_DO_PEDIDO_COM_CLIENTE = CAMPOS_DO_PEDIDO + ", perfis ( nome, telefo
 
 const TAMANHO_MAXIMO_DO_RECADO = 500;
 
+// RF-11: os pedidos da cliente logada, do mais recente ao mais antigo (a página agrupa por compra, usando o grupo_id).
+// Devolve as linhas do banco; a página transforma cada uma em Pedido com Pedido.deLinha().
+export async function listarMeusPedidos() {
+  try {
+    const usuaria = await usuariaAtual();
+    if (!(usuaria instanceof Cliente)) {
+      throw new ErroApp("exige_cliente", "Entre com uma conta de cliente para ver os seus pedidos.");
+    }
+
+    const supabase = exigirSupabase();
+    const { data, error } = await supabase
+      .from("pedidos")
+      .select(CAMPOS_DO_PEDIDO)
+      .eq("cliente_id", usuaria.id)
+      .order("criado_em", { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+    return data;
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível carregar os seus pedidos. Verifique sua conexão e tente novamente.");
+  }
+}
+
 // RF-20: os pedidos recebidos pela loja da lojista, do mais recente ao mais antigo, com o nome e o telefone da cliente.
 export async function listarPedidosDaMinhaLoja(lojaId) {
   try {
@@ -189,5 +214,45 @@ export async function atualizarPedido(id, { status, mensagemLoja } = {}) {
     return alterados[0];
   } catch (erro) {
     throw paraErroApp(erro, "Não foi possível atualizar o pedido. Verifique sua conexão e tente novamente.");
+  }
+}
+
+// RF-22: quantos pedidos da cliente têm novidade (status_visto = false). Para quem não é cliente, zero.
+export async function contarNovidades() {
+  try {
+    const usuaria = await usuariaAtual();
+    if (!(usuaria instanceof Cliente)) {
+      return 0;
+    }
+
+    const supabase = exigirSupabase();
+    // head: true devolve só a contagem, sem trazer os pedidos
+    const { count, error } = await supabase
+      .from("pedidos")
+      .select("id", { count: "exact", head: true })
+      .eq("cliente_id", usuaria.id)
+      .eq("status_visto", false);
+
+    if (error) {
+      throw error;
+    }
+    return count ?? 0;
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível verificar as novidades dos pedidos.");
+  }
+}
+
+// RN-13: a cliente abriu Meus pedidos, então as novidades passam a "vistas".
+// É uma função do banco (e não um update direto) para a cliente não poder alterar nenhuma outra coluna.
+export async function marcarComoVistos() {
+  try {
+    const supabase = exigirSupabase();
+    const { error } = await supabase.rpc("marcar_pedidos_como_vistos");
+
+    if (error) {
+      throw error;
+    }
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível marcar os pedidos como vistos.");
   }
 }
