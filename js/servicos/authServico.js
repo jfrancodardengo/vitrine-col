@@ -5,6 +5,7 @@ import { Cliente } from "../modelos/Cliente.js";
 import { Lojista } from "../modelos/Lojista.js";
 import { paraErroApp, erroDeEmailJaCadastrado } from "./errosSupabase.js";
 import { normalizarTelefone, telefoneValido } from "../ui/formatadores.js";
+import { tentarRemoverFotos } from "./storageServico.js";
 
 const SENHA_MINIMA = 6;
 const FORMATO_DE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -204,7 +205,7 @@ export async function usuariaAtual() {
 // O callback recebe a usuária (Cliente ou Lojista) ou null. Devolve uma função para parar de observar.
 export function observarSessao(callback) {
   if (configuracaoDeExemplo) {
-    return () => {};
+    return () => { };
   }
 
   try {
@@ -228,7 +229,7 @@ export function observarSessao(callback) {
 
     return () => data.subscription.unsubscribe();
   } catch (erro) {
-    return () => {};
+    return () => { };
   }
 }
 
@@ -257,7 +258,7 @@ export async function pedirRedefinicaoDeSenha(email) {
 // avisa com o evento PASSWORD_RECOVERY. Chama "callback" nesse caso. Devolve uma função para parar de observar.
 export function aoReceberLinkDeRecuperacao(callback) {
   if (configuracaoDeExemplo) {
-    return () => {};
+    return () => { };
   }
   try {
     const { data } = exigirSupabase().auth.onAuthStateChange((evento) => {
@@ -267,7 +268,7 @@ export function aoReceberLinkDeRecuperacao(callback) {
     });
     return () => data.subscription.unsubscribe();
   } catch (erro) {
-    return () => {};
+    return () => { };
   }
 }
 
@@ -281,5 +282,47 @@ export async function definirNovaSenha({ senha, confirmacao }) {
     }
   } catch (erro) {
     throw paraErroApp(erro, "Não foi possível trocar a senha. Peça um novo link e tente de novo.");
+  }
+}
+
+// ---------- Excluir a própria conta (RF-25) ----------
+
+// Apaga os arquivos de foto da loja da lojista (o banco não alcança o Storage) e depois chama a função
+// excluir_minha_conta() do banco (database/04_melhorias.sql), que apaga pedidos, loja, produtos, perfil e a conta.
+// Se alguma foto não puder ser apagada, a exclusão da conta continua: foto sobrando é só espaço ocupado.
+export async function excluirMinhaConta() {
+  try {
+    const usuaria = await usuariaAtual();
+    if (!usuaria) {
+      throw new ErroApp("exige_login", "Entre na sua conta para excluí-la.");
+    }
+    const supabase = exigirSupabase();
+
+    if (usuaria instanceof Lojista) {
+      const { data: fotos, error: erroDasFotos } = await supabase
+        .from("produto_fotos")
+        .select("caminho, produtos!inner ( loja_id, lojas!inner ( dono_id ) )")
+        .eq("produtos.lojas.dono_id", usuaria.id)
+        .not("caminho", "is", null);
+      if (erroDasFotos) {
+        throw erroDasFotos;
+      }
+      await tentarRemoverFotos(fotos.map((foto) => foto.caminho));
+    }
+
+    const { error } = await supabase.rpc("excluir_minha_conta");
+    if (error) {
+      throw error;
+    }
+
+    // A conta já não existe: só falta descartar a sessão guardada no navegador
+    usuariaEmCache = null;
+    try {
+      await supabase.auth.signOut({ scope: "local" });
+    } catch (erroAoSair) {
+      console.warn("Conta excluída; a sessão local será descartada.", erroAoSair);
+    }
+  } catch (erro) {
+    throw paraErroApp(erro, "Não foi possível excluir a conta. Tente novamente em instantes.");
   }
 }

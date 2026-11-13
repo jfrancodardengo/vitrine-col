@@ -417,6 +417,35 @@ h1[tabindex="-1"]:focus {
   margin-top: var(--espaco-3);
 }
 
+/* ---------- Minha conta ---------- */
+.cartao-formulario + .cartao-formulario {
+  margin-top: var(--espaco-5);
+}
+
+.dados-da-conta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--espaco-2) var(--espaco-4);
+  margin: 0;
+}
+
+.dados-da-conta dt {
+  font-weight: 600;
+}
+
+.dados-da-conta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.zona-de-perigo {
+  border-color: var(--cor-erro);
+}
+
+.zona-de-perigo ul {
+  margin: 0 0 var(--espaco-4) var(--espaco-5);
+}
+
 /* ---------- Botão "Carregar mais" do catálogo ---------- */
 .paginacao {
   margin-top: var(--espaco-5);

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minha conta – VitrineCol</title>
+  <link rel="stylesheet" href="css/variaveis.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/paginas.css">
+</head>
+
+<body>
+  <a class="link-pular" href="#conteudo">Ir para o conteúdo</a>
+  <header class="cabecalho" id="cabecalho"></header>
+
+  <main id="conteudo" class="container" hidden>
+    <h1>Minha conta</h1>
+
+    <section class="cartao-formulario cartao-formulario-largo" aria-labelledby="titulo-dados">
+      <h2 id="titulo-dados">Meus dados</h2>
+      <dl class="dados-da-conta">
+        <dt>Nome</dt>
+        <dd id="conta-nome"></dd>
+        <dt>E-mail</dt>
+        <dd id="conta-email"></dd>
+        <dt>Tipo de conta</dt>
+        <dd id="conta-tipo"></dd>
+      </dl>
+    </section>
+
+    <section class="cartao-formulario cartao-formulario-largo zona-de-perigo" aria-labelledby="titulo-excluir">
+      <h2 id="titulo-excluir">Excluir minha conta</h2>
+      <p>Esta ação é definitiva e não pode ser desfeita. Ao excluir:</p>
+      <ul id="lista-do-que-some">
+        <li>seus dados de cadastro e o seu acesso ao site são apagados;</li>
+        <li>os seus pedidos e o histórico deles são apagados.</li>
+      </ul>
+      <form class="formulario" id="formulario-excluir" novalidate>
+        <div class="campo">
+          <label for="confirmacao">Para confirmar, digite EXCLUIR</label>
+          <input type="text" id="confirmacao" name="confirmacao" autocomplete="off" autocapitalize="characters"
+            required>
+        </div>
+        <button type="submit" class="botao botao-perigo">Excluir minha conta</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <div class="container">
+      <ul class="rodape-links">
+        <li><a href="privacidade.html">Aviso de privacidade</a></li>
+        <li><a href="meus-pedidos.html">Meus pedidos</a></li>
+        <li><a href="painel-loja.html">Painel da loja</a></li>
+      </ul>
+      <p>Projeto integrador – Jovem Programadora (Senac). Pagamento e entrega são combinados direto com a loja.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="js/paginas/minhaConta.js"></script>
+</body>
+
+</html>
